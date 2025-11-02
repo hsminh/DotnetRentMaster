@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RentMaster.Core.Services;
+using RentMaster.Core.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 namespace RentMaster.Core.Controllers;
 
 [ApiController]
+[Route("[controller]/api")]
 public abstract class BaseController<T> : ControllerBase where T : class
 {
     protected readonly BaseService<T> Service;
@@ -33,7 +35,7 @@ public abstract class BaseController<T> : ControllerBase where T : class
         return Ok(entity);
     }
 
-    [HttpPost]
+    [HttpPost] 
     public virtual async Task<IActionResult> Create([FromBody] T model)
     {
         if (!ModelState.IsValid)
@@ -44,10 +46,11 @@ public abstract class BaseController<T> : ControllerBase where T : class
             var created = await Service.CreateAsync(model);
             return CreatedAtAction(nameof(GetByUid), new { id = GetEntityId(created) }, created);
         }
-        catch (Exception ex)
+        catch (ValidationException ex)
         {
-            return Conflict(new { message = ex.Message });
+            return BadRequest(ex.Errors);
         }
+   
     }
 
     [HttpPut("{id:guid}")]
@@ -76,6 +79,10 @@ public abstract class BaseController<T> : ControllerBase where T : class
         catch (KeyNotFoundException)
         {
             return NotFound();
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Errors);
         }
         catch (Exception ex)
         {

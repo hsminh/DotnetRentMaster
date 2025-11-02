@@ -19,7 +19,8 @@ namespace RentMaster.Accounts.Services
         {
             var isValid = await _validator.ValidateGmailAsync(model.Gmail);
             if (!isValid)
-                throw new Exception("Gmail already exists.");
+                throw new RentMaster.Core.Exceptions.ValidationException("gmail", "Gmail already exists.");
+
 
             if (!string.IsNullOrEmpty(model.Password))
             {
@@ -33,7 +34,7 @@ namespace RentMaster.Accounts.Services
         {
             var isValid = await _validator.ValidateGmailAsync(model.Gmail, model.Uid);
             if (!isValid)
-                throw new Exception("Gmail already exists for another user.");
+                throw new RentMaster.Core.Exceptions.ValidationException("gmail", "Gmail already exists for another user.");
 
             if (!string.IsNullOrEmpty(model.Password))
             {

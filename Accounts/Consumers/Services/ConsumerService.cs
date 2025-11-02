@@ -20,9 +20,12 @@ namespace RentMaster.Accounts.Services
         {
             var isEmailValid = await _validator.ValidateGmailAsync(model.Gmail);
             if (!isEmailValid)
-                throw new ConflictException("The provided email address is already in use. Please use a different email or try signing in.");
+                throw new ValidationException("gmail", "Gmail already exists.");
             
-            model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            if (!string.IsNullOrEmpty(model.Password))
+            {
+                model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            }
             return await base.CreateAsync(model);
         }
 
@@ -30,8 +33,12 @@ namespace RentMaster.Accounts.Services
         {
             var isEmailValid = await _validator.ValidateGmailAsync(model.Gmail, model.Uid);
             if (!isEmailValid)
-                throw new ConflictException("The provided email address is already in use by another account. Please use a different email address.");
+                throw new ValidationException("gmail", "Gmail already exists for another user.");
 
+            if (!string.IsNullOrEmpty(model.Password))
+            {
+                model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            }
             await base.UpdateAsync(model);
         }
     }

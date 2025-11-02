@@ -1,6 +1,7 @@
 using RentMaster.Accounts.Repositories;
 using RentMaster.Accounts.Validator;
 using RentMaster.Core.Services;
+using RentMaster.Core.Exceptions;
 
 namespace RentMaster.Accounts.Services
 {
@@ -18,9 +19,12 @@ namespace RentMaster.Accounts.Services
         {
             var isValid = await _validator.ValidateGmailAsync(model.Gmail);
             if (!isValid)
-                throw new Exception("Gmail already exists.");
+                throw new ValidationException("gmail", "Gmail already exists.");
             
-            model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            if (!string.IsNullOrEmpty(model.Password))
+            {
+                model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            }
             return await base.CreateAsync(model);
         }
 
@@ -28,7 +32,7 @@ namespace RentMaster.Accounts.Services
         {
             var isValid = await _validator.ValidateGmailAsync(model.Gmail, model.Uid);
             if (!isValid)
-                throw new Exception("Gmail already exists for another user.");
+                throw new ValidationException("gmail", "Gmail already exists for another user.");
 
             await base.UpdateAsync(model);
         }
