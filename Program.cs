@@ -3,12 +3,15 @@ using Microsoft.EntityFrameworkCore;
 using RentMaster.Data;
 using RentMaster.Accounts;
 using RentMaster.Core.Auth;
+using RentMaster.Core.Cloudinary;
 using RentMaster.Core.Middleware;
+using RentMaster.RealEstate;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Load environment variables from .env
-Env.Load();
+var root = Directory.GetCurrentDirectory();
+Env.Load(Path.Combine(root, ".env"));
 builder.Configuration["Jwt:Key"] = Environment.GetEnvironmentVariable("JWT_KEY");
 builder.Configuration["Jwt:Issuer"] = Environment.GetEnvironmentVariable("JWT_ISSUER");
 builder.Configuration["Jwt:Audience"] = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
@@ -34,10 +37,36 @@ builder.Services.AddControllers();
 // Register custom modules
 builder.Services.AddAccountModule();
 builder.Services.AddAuthModule(); 
+builder.Services.RealEstateModule(); 
 
+// Add Authentication
+builder.Services.AddAuthentication()
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
+
+// Add Cloudinary configuration
+builder.Services.AddSingleton<CloudinaryStorage>();
 
 // Register OpenAPI/Swagger
 builder.Services.AddOpenApi();
+
+// Configure file upload limits (30MB)
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 30 * 1024 * 1024; // 30MB
+});
 
 var app = builder.Build();
 
