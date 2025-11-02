@@ -1,7 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using RentMaster.Core.Auth.Types;
 using RentMaster.Data;
 
@@ -20,22 +20,18 @@ public class JwtMiddleware
 
     public async Task InvokeAsync(HttpContext context, AppDbContext db)
     {
-        // ✅ 1. Lấy endpoint đang được gọi
         var endpoint = context.GetEndpoint();
         var hasAdminScope = endpoint?.Metadata.GetMetadata<Attributes.AdminScopeAttribute>() != null;
         var hasUserScope = endpoint?.Metadata.GetMetadata<Attributes.UserScopeAttribute>() != null;
+        var hasLandLordScope = endpoint?.Metadata.GetMetadata<Attributes.LandLordScopeAttribute>() != null;
 
-        // ✅ 2. Lấy token nếu có
-        var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-
-        // Nếu không yêu cầu xác thực (public API)
-        if (!hasAdminScope && !hasUserScope)
+        if (!hasAdminScope && !hasUserScope && !hasLandLordScope)
         {
             await _next(context);
             return;
         }
 
-        // Nếu API yêu cầu xác thực nhưng không có token → 401
+        var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
         if (string.IsNullOrEmpty(token))
         {
             context.Response.StatusCode = 401;
@@ -45,7 +41,6 @@ public class JwtMiddleware
 
         try
         {
-            // ✅ 3. Validate token
             var jwt = ValidateJwtToken(token);
             if (jwt == null)
             {
@@ -54,7 +49,6 @@ public class JwtMiddleware
                 return;
             }
 
-            // ✅ 4. Đọc role
             var role = jwt.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
             var userId = jwt.Claims.FirstOrDefault(c => c.Type == "uid")?.Value;
 
@@ -65,16 +59,15 @@ public class JwtMiddleware
                 return;
             }
 
-            // ✅ 5. Check scope
-            if (hasAdminScope && role != nameof(UserTypes.Admin) ||
-                hasUserScope && role != nameof(UserTypes.Consumer))
+            if ((hasAdminScope && role != nameof(UserTypes.Admin)) ||
+                (hasUserScope && role != nameof(UserTypes.Consumer)) ||
+                (hasLandLordScope && role != nameof(UserTypes.LandLord)))
             {
                 context.Response.StatusCode = 403;
                 await context.Response.WriteAsync("Forbidden: role not allowed");
                 return;
             }
 
-            // ✅ 6. Attach current user
             var user = await GetUserByRoleAsync(db, uid, role);
             if (user == null)
             {
@@ -83,7 +76,10 @@ public class JwtMiddleware
                 return;
             }
 
-            context.Items["CurrentUser"] = user;
+            context.Items["user"] = user;
+            context.Items["role"] = role;
+            context.Items["uid"] = uid;
+
             await _next(context);
         }
         catch (Exception ex)

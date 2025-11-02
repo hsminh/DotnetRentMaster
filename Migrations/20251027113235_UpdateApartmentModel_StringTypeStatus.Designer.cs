@@ -12,8 +12,8 @@ using RentMaster.Data;
 namespace RentMaster.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251023122955_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251027113235_UpdateApartmentModel_StringTypeStatus")]
+    partial class UpdateApartmentModel_StringTypeStatus
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -161,6 +161,124 @@ namespace RentMaster.Migrations
                     b.HasKey("Uid");
 
                     b.ToTable("landlord");
+                });
+
+            modelBuilder.Entity("RentMaster.RealEstate.apartment_rooms.Models.Apartment", b =>
+                {
+                    b.Property<Guid>("Uid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AddressDivisionUid")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("AreaLength")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("AreaWidth")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("FloorNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("LandlordUid")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)")
+                        .HasAnnotation("Relational:JsonPropertyName", "status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<int?>("TotalFloors")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)")
+                        .HasAnnotation("Relational:JsonPropertyName", "type");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Uid");
+
+                    b.ToTable("Apartments");
+                });
+
+            modelBuilder.Entity("RentMaster.RealEstate.apartment_rooms.Models.ApartmentRoom", b =>
+                {
+                    b.Property<Guid>("Uid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ApartmentUid")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("AreaLength")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("AreaWidth")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("FloorNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal?>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("RoomNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Uid");
+
+                    b.ToTable("apartment_rooms");
                 });
 #pragma warning restore 612, 618
         }
