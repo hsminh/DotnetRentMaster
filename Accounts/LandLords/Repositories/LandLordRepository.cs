@@ -9,5 +9,6 @@ namespace RentMaster.Accounts.Repositories
         public LandLordRepository(AppDbContext context) : base(context)
         {
         }
+        
     }
 }

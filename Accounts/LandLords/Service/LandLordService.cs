@@ -35,13 +35,39 @@ namespace RentMaster.Accounts.Services
             var isValid = await _validator.ValidateGmailAsync(model.Gmail, model.Uid);
             if (!isValid)
                 throw new RentMaster.Core.Exceptions.ValidationException("gmail", "Gmail already exists for another user.");
-
-            if (!string.IsNullOrEmpty(model.Password))
+            var existing = await Repository.FindByUidAsync(model.Uid);
+            if (existing == null)
+                throw new KeyNotFoundException("Landlord not found.");
+            if (string.IsNullOrEmpty(model.Password) || model.Password == "*************")
+            {
+                model.Password = existing.Password;
+            }
+            else
             {
                 model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
             }
-
             await base.UpdateAsync(model);
         }
+
+        
+        public async Task UpdateIgnoringNullFieldsAsync(LandLord model)
+        {
+            var existing = await GetByUidAsync(model.Uid);
+            if (existing == null)
+                throw new KeyNotFoundException("Landlord not found.");
+
+            foreach (var prop in typeof(LandLord).GetProperties())
+            {
+                var newValue = prop.GetValue(model);
+                if (newValue != null)
+                {
+                    prop.SetValue(existing, newValue);
+                }
+            }
+
+            await UpdateAsync(existing); // hoặc context.SaveChangesAsync()
+        }
+
+
     }
 }
