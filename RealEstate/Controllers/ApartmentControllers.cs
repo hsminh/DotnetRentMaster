@@ -32,7 +32,7 @@ public class ApartmentController : BaseController<Apartment>
     [HttpPost]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(50_000_000)]
-    public new async Task<IActionResult> Create([FromForm] ApartmentCreateRequest request)
+    public async Task<IActionResult> Create([FromForm] ApartmentCreateRequest request)
     {
         var landlord = HttpContext.GetCurrentUser<LandLord>();
         var result = await _apartmentService.CreateApartmentAsync(landlord, request);
@@ -44,6 +44,11 @@ public class ApartmentController : BaseController<Apartment>
         });
     }
 
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public override async Task<IActionResult> Create([FromBody] Apartment model)
+    {
+        return await base.Create(model);
+    }
     
     [HttpGet("{id}")]
     public override async Task<IActionResult> GetByUid(Guid id)

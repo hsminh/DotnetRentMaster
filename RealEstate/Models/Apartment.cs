@@ -31,9 +31,6 @@ public class Apartment : BaseModel
     [Column(TypeName = "decimal(18,2)")]
     public decimal? AreaWidth { get; set; }
 
-    public int? Quantity { get; set; }
-
-    public int? FloorNumber { get; set; }
 
     public int? TotalFloors { get; set; }
 
@@ -58,8 +55,6 @@ public class Apartment : BaseModel
         AddressDivisionUid = request.AddressDivisionUid;
         AreaLength = request.AreaLength;
         AreaWidth = request.AreaWidth;
-        Quantity = request.Quantity;
-        FloorNumber = request.FloorNumber;
         Type = request.Type;
         Status = request.Status;
         Images = imageUrls;
@@ -73,11 +68,8 @@ public class Apartment : BaseModel
         existing.AddressDivisionUid = request.AddressDivisionUid;
         existing.AreaLength = request.AreaLength;
         existing.AreaWidth = request.AreaWidth;
-        existing.Quantity = request.Quantity;
-        existing.FloorNumber = request.FloorNumber;
         existing.Type = request.Type;
         existing.Status = request.Status;
-
         if (imageUrls != null && imageUrls.Count > 0)
             existing.Images = imageUrls;
     }

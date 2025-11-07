@@ -56,21 +56,20 @@ public class ApartmentService : BaseService<Apartment>
 
     public async Task<Apartment> CreateApartmentAsync(LandLord landLord, ApartmentCreateRequest request)
     {
-        if (request.Files == null || request.Files.Count == 0)
-            throw new ArgumentException("No files uploaded.");
-
         var imageUrls = new List<string>();
-
-        foreach (var file in request.Files)
+        if (request.Files != null && request.Files.Count > 0)
         {
-            var uploadResult = await _fileService.UploadFileAsync(
-                file,
-                landLord.Uid,
-                FileType.Image,
-                FileScope.Public
-            );
+            foreach (var file in request.Files)
+            {
+                var uploadResult = await _fileService.UploadFileAsync(
+                    file,
+                    landLord.Uid,
+                    FileType.Image,
+                    FileScope.Public
+                );
 
-            imageUrls.Add(uploadResult.Url);
+                imageUrls.Add(uploadResult.Url);
+            }
         }
         var apartment = new Apartment(request, landLord.Uid, imageUrls);
         return await _apartmentRepository.CreateAsync(apartment);
