@@ -25,6 +25,11 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
             return await _dbSet.FirstOrDefaultAsync(predicate);
         }
         
+        public virtual IEnumerable<T> Filter(Expression<Func<T, bool>> predicate)
+        {
+            return _dbSet.Where(predicate).ToList();
+        }
+        
         public virtual async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
         {
             return await _dbSet.Where(predicate).ToListAsync();

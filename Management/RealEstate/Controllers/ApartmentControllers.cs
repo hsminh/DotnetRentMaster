@@ -6,7 +6,7 @@ using RentMaster.RealEstate.Models;
 using RentMaster.RealEstate.Services;
 using RentMaster.RealEstate.Types.Request;
 
-namespace RentMaster.RealEstate.Controllers;
+namespace RentMaster.Management.RealEstate.Controllers;
 
 [ApiController]
 [Attributes.LandLordScope]
@@ -32,7 +32,7 @@ public class ApartmentController : BaseController<Apartment>
     [HttpPost]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(50_000_000)]
-    public new async Task<IActionResult> Create([FromForm] ApartmentCreateRequest request)
+    public async Task<IActionResult> Create([FromForm] ApartmentCreateRequest request)
     {
         var landlord = HttpContext.GetCurrentUser<LandLord>();
         var result = await _apartmentService.CreateApartmentAsync(landlord, request);
@@ -44,6 +44,33 @@ public class ApartmentController : BaseController<Apartment>
         });
     }
 
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public override async Task<IActionResult> Create([FromBody] Apartment model)
+    {
+        return await base.Create(model);
+    }
+    
+    [HttpPut("{id}")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(50_000_000)]
+    public async Task<IActionResult> Update(Guid id, [FromForm] ApartmentCreateRequest request)
+    {
+        var landlord = HttpContext.GetCurrentUser<LandLord>();
+        var result = await _apartmentService.UpdateApartment(landlord, id, request);
+
+        return Ok(new
+        {
+            Message = "apartment_updated_successfully",
+            Data = result
+        });
+    }
+
+    [NonAction]
+    public override async Task<IActionResult> Update(Guid id, [FromBody] Apartment model)
+    {
+        return await base.Update(id, model);
+    }
+    
     
     [HttpGet("{id}")]
     public override async Task<IActionResult> GetByUid(Guid id)
@@ -56,23 +83,5 @@ public class ApartmentController : BaseController<Apartment>
 
         return Ok(apartment);
     }
-
-    [HttpPut("{id}")]
-    [Consumes("multipart/form-data")]
-    [RequestSizeLimit(50_000_000)]
-    public new async Task<IActionResult> Update(Guid id, [FromForm] ApartmentCreateRequest request)
-    {
-        if (request == null)
-            return BadRequest("Invalid request.");
-
-        var landlord = HttpContext.GetCurrentUser<LandLord>();
-        var result = await _apartmentService.UpdateApartment(landlord, id, request);
-
-        return Ok(new
-        {
-            Message = "apartment_updated_successfully",
-            Data = result
-        });
-    }
-
+    
 } 

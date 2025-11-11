@@ -186,9 +186,6 @@ namespace RentMaster.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("FloorNumber")
-                        .HasColumnType("integer");
-
                     b.PrimitiveCollection<List<string>>("Images")
                         .IsRequired()
                         .HasColumnType("text[]");
@@ -206,9 +203,6 @@ namespace RentMaster.Migrations
 
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("Quantity")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -234,7 +228,7 @@ namespace RentMaster.Migrations
                     b.ToTable("Apartments");
                 });
 
-            modelBuilder.Entity("RentMaster.RealEstate.apartment_rooms.Models.ApartmentRoom", b =>
+            modelBuilder.Entity("RentMaster.RealEstate.Models.ApartmentRoom", b =>
                 {
                     b.Property<Guid>("Uid")
                         .ValueGeneratedOnAdd()
@@ -259,11 +253,15 @@ namespace RentMaster.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("FloorNumber")
-                        .HasColumnType("integer");
+                    b.PrimitiveCollection<List<string>>("Images")
+                        .IsRequired()
+                        .HasColumnType("text[]");
 
                     b.Property<bool>("IsDelete")
                         .HasColumnType("boolean");
+
+                    b.Property<Guid>("LandlordUid")
+                        .HasColumnType("uuid");
 
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(18,2)");
