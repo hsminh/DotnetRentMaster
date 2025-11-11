@@ -6,7 +6,7 @@ using RentMaster.RealEstate.Models;
 using RentMaster.RealEstate.Services;
 using RentMaster.RealEstate.Types.Request;
 
-namespace RentMaster.RealEstate.Controllers;
+namespace RentMaster.Management.RealEstate.Controllers;
 
 [ApiController]
 [Attributes.LandLordScope]

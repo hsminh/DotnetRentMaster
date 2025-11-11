@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using RentMaster.Management.Tenant;
 using RentMaster.RealEstate.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,6 +54,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddAccountModule();
 builder.Services.AddAuthModule();
 builder.Services.RealEstateModule();
+builder.Services.AddTenantModule();
 
 // Register repository
 

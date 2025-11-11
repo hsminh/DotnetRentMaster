@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RentMaster.Accounts.Models;
+using RentMaster.Management.Tenant.Models;
 using RentMaster.RealEstate.Models;
 
 namespace RentMaster.Data
@@ -15,5 +16,6 @@ namespace RentMaster.Data
         public DbSet<LandLord> LandLords { get; set; }
         public DbSet<Apartment> Apartments { get; set; }
         public DbSet<ApartmentRoom> ApartmentRooms { get; set; }
+        public DbSet<Tenant> Tenant { get; set; }
     }
 }
