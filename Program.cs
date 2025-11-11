@@ -8,6 +8,9 @@ using RentMaster.Core.Middleware;
 using RentMaster.RealEstate;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using RentMaster.RealEstate.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,13 +45,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Register Controllers
 // ------------------------------
 builder.Services.AddControllers();
-
+builder.Services.AddValidatorsFromAssemblyContaining<ApartmentRoomValidator>();
+builder.Services.AddFluentValidationAutoValidation();
 // ------------------------------
 // Register custom modules
 // ------------------------------
 builder.Services.AddAccountModule();
 builder.Services.AddAuthModule();
 builder.Services.RealEstateModule();
+
+// Register repository
 
 // ------------------------------
 // Configure CORS

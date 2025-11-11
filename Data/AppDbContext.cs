@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using RentMaster.Accounts.Models;
-using RentMaster.RealEstate.apartment_rooms.Models;
 using RentMaster.RealEstate.Models;
 
 namespace RentMaster.Data

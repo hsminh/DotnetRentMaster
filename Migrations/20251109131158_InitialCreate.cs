@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RentMaster.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate2 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -38,12 +39,13 @@ namespace RentMaster.Migrations
                 {
                     Uid = table.Column<Guid>(type: "uuid", nullable: false),
                     ApartmentUid = table.Column<Guid>(type: "uuid", nullable: false),
+                    LandlordUid = table.Column<Guid>(type: "uuid", nullable: false),
                     RoomNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Price = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
                     AreaLength = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
                     AreaWidth = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
-                    FloorNumber = table.Column<int>(type: "integer", nullable: true),
                     Status = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    Images = table.Column<List<string>>(type: "text[]", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -62,16 +64,16 @@ namespace RentMaster.Migrations
                     Uid = table.Column<Guid>(type: "uuid", nullable: false),
                     LandlordUid = table.Column<Guid>(type: "uuid", nullable: false),
                     Price = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
+                    Pid = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: false),
                     Title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     AddressDivisionUid = table.Column<Guid>(type: "uuid", nullable: true),
                     AreaLength = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
                     AreaWidth = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
-                    Quantity = table.Column<int>(type: "integer", nullable: true),
-                    FloorNumber = table.Column<int>(type: "integer", nullable: true),
                     TotalFloors = table.Column<int>(type: "integer", nullable: true),
                     Type = table.Column<string>(type: "varchar(50)", nullable: false),
                     Status = table.Column<string>(type: "varchar(50)", nullable: false),
+                    Images = table.Column<List<string>>(type: "text[]", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),

@@ -10,6 +10,8 @@
         <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
         <PackageReference Include="CloudinaryDotNet" Version="1.27.8" />
         <PackageReference Include="DotNetEnv" Version="3.1.1" />
+        <PackageReference Include="FluentValidation" Version="12.1.0" />
+        <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.10" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
@@ -28,6 +30,10 @@
     <ItemGroup>
       <Folder Include="Accounts\Admin\" />
       <Folder Include="Accounts\Auth\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Core\Middleware\ValidationMiddleware.cs" />
     </ItemGroup>
 
 </Project>
