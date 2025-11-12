@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using RentMaster.Accounts.Models;
 using RentMaster.Management.Tenant.Models;
 using RentMaster.RealEstate.Models;
+using RentMaster.Management.AddressDivision.Models;
 
 namespace RentMaster.Data
 {
@@ -17,5 +18,6 @@ namespace RentMaster.Data
         public DbSet<Apartment> Apartments { get; set; }
         public DbSet<ApartmentRoom> ApartmentRooms { get; set; }
         public DbSet<Tenant> Tenant { get; set; }
+        public DbSet<AddressDivision> AddressDivisions { get; set; }
     }
 }
