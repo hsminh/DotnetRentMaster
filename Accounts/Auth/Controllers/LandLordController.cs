@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using RentMaster.Accounts.Models;
-using RentMaster.Accounts.Services;
+using RentMaster.Accounts.LandLords.Models;
+using RentMaster.Accounts.LandLords.Service;
 using RentMaster.Core.Controllers;
 using RentMaster.Core.Exceptions;
 
-namespace RentMaster.Controllers
+namespace RentMaster.Accounts.Auth.Controllers
 {
     [ApiController]
     [Route("landlord/api")]

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using RentMaster.Accounts.Services;
+using RentMaster.Accounts.Admin.Services;
+using RentMaster.Accounts.LandLords.Models;
+using RentMaster.Accounts.LandLords.Service;
 using RentMaster.Core.Controllers;
 using RentMaster.Core.Middleware;
 using RentMaster.Core.Utils;
@@ -9,7 +11,7 @@ namespace RentMaster.Accounts.Admin.Controllers;
 [ApiController]
 [Attributes.AdminScope]
 [Route("[controller]/api/landlords")]
-public class AdminController : BaseController<Models.LandLord>
+public class AdminController : BaseController<LandLord>
 {
     private readonly LandLordService _landlordService;
 

@@ -2,14 +2,16 @@ using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using RentMaster.Data;
 using RentMaster.Accounts;
-using RentMaster.Core.Auth;
 using RentMaster.Core.Cloudinary;
 using RentMaster.Core.Middleware;
-using RentMaster.RealEstate;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using RentMaster.Addresses;
+using RentMaster.Addresses.Commands;
+using RentMaster.Core.Backend.Auth;
+using RentMaster.Management.RealEstate;
 using RentMaster.Management.Tenant;
 using RentMaster.RealEstate.Validators;
 
@@ -41,6 +43,7 @@ var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username=
 // ------------------------------
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
+builder.Services.AddTransient<AddressDataSeeder>();  
 
 // ------------------------------
 // Register Controllers
@@ -55,6 +58,7 @@ builder.Services.AddAccountModule();
 builder.Services.AddAuthModule();
 builder.Services.RealEstateModule();
 builder.Services.AddTenantModule();
+builder.Services.AddressModule();
 
 // Register repository
 
@@ -150,6 +154,17 @@ app.MapGet("/weatherforecast", () =>
 
     return forecast;
 }).WithName("GetWeatherForecast");
+
+if (args.Length > 0 && args[0] == "seed-addresses")
+{
+    var filePath = args.Length > 2 && args[1] == "--file" ? args[2] : "Addresses/data/address_data.csv";
+
+    using var scope = app.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<AddressDataSeeder>();
+    await seeder.SeedAsync(filePath);
+
+    return; // exit after seeding
+}
 
 app.Run();
 

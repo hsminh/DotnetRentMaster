@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using RentMaster.Core.Auth.Interface;
-using RentMaster.Core.Auth.Models;
-using RentMaster.Core.Auth.Types;
+using RentMaster.Core.Backend.Auth.Interface;
+using RentMaster.Core.Backend.Auth.Types.enums;
 
 namespace RentMaster.Controllers
 {
@@ -19,7 +19,7 @@ namespace RentMaster.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest model)
         {
-            var token = await _authService.LoginAsync(model.Gmail, model.Password, UserTypes.Consumer);
+            var token = await _authService.LoginAsync(model.Email, model.Password, UserTypes.Consumer);
             if (token == null)
                 return Unauthorized(new { message = "Invalid Gmail or Password" });
 

@@ -1,3 +1,9 @@
+using RentMaster.Accounts.Admin.Repositories;
+using RentMaster.Accounts.Admin.Services;
+using RentMaster.Accounts.Admin.Validators;
+using RentMaster.Accounts.LandLords.Repositories;
+using RentMaster.Accounts.LandLords.Service;
+using RentMaster.Accounts.LandLords.Validator;
 using RentMaster.Accounts.Validator; 
 using RentMaster.Accounts.Repositories;
 using RentMaster.Accounts.Services;

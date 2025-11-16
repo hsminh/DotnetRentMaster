@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using RentMaster.Core.Models;
+using RentMaster.Core.types.enums;
 
-namespace RentMaster.Core.Auth;
+namespace RentMaster.Core.Backend.Auth;
 
 public abstract class BaseAuth : BaseModel
 {
@@ -18,6 +19,8 @@ public abstract class BaseAuth : BaseModel
     public string FirstName { get; set; } = string.Empty;
 
     public string LastName { get; set; } = string.Empty;
+    
+    public string Status { get; set; } = UserStatus.Active.ToString();
 
     [Phone]
     public string? PhoneNumber { get; set; }

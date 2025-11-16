@@ -1,7 +1,7 @@
 using RentMaster.Core.Repositories;
 using RentMaster.Data;
 
-namespace RentMaster.Accounts.Repositories
+namespace RentMaster.Accounts.Admin.Repositories
 {
     public class AdminRepository: BaseRepository<Models.Admin>
     {

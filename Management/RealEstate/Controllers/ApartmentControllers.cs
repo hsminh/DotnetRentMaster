@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using RentMaster.Accounts.Models;
+using RentMaster.Accounts.LandLords.Models;
 using RentMaster.Core.Controllers;
 using RentMaster.Core.Middleware;
+using RentMaster.Management.RealEstate.Services;
 using RentMaster.RealEstate.Models;
-using RentMaster.RealEstate.Services;
 using RentMaster.RealEstate.Types.Request;
 
 namespace RentMaster.Management.RealEstate.Controllers;

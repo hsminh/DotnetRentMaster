@@ -1,4 +1,4 @@
-namespace RentMaster.Core.Auth.Models
+namespace RentMaster.Core.Backend.Auth.Types.Request
 {
     public class LoginRequest
     {

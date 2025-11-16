@@ -1,9 +1,9 @@
-using RentMaster.Accounts.Models;
-using RentMaster.Accounts.Repositories;
-using RentMaster.Accounts.Validator;
+using RentMaster.Accounts.LandLords.Models;
+using RentMaster.Accounts.LandLords.Repositories;
+using RentMaster.Accounts.LandLords.Validator;
 using RentMaster.Core.Services;
 
-namespace RentMaster.Accounts.Services
+namespace RentMaster.Accounts.LandLords.Service
 {
     public class LandLordService : BaseService<LandLord>
     {

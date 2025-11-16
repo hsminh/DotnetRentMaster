@@ -1,4 +1,4 @@
-namespace RentMaster.Core.Auth.Types;
+namespace RentMaster.Core.Backend.Auth.Types.enums;
 
 public enum UserTypes
 {

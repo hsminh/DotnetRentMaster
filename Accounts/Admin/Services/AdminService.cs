@@ -1,9 +1,9 @@
-using RentMaster.Accounts.Repositories;
-using RentMaster.Accounts.Validator;
+using RentMaster.Accounts.Admin.Repositories;
+using RentMaster.Accounts.Admin.Validators;
 using RentMaster.Core.Services;
 using RentMaster.Core.Exceptions;
 
-namespace RentMaster.Accounts.Services
+namespace RentMaster.Accounts.Admin.Services
 {
     public class AdminService : BaseService<Models.Admin>
     {

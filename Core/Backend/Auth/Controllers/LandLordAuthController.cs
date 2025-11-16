@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using RentMaster.Core.Auth.Interface;
-using RentMaster.Core.Auth.Models;
-using RentMaster.Core.Auth.Types;
+using RentMaster.Core.Backend.Auth.Interface;
+using RentMaster.Core.Backend.Auth.Types.enums;
+using RentMaster.Core.Backend.Auth.Types.Request;
 
 [ApiController]
 [Route("landlord/api/auth")]

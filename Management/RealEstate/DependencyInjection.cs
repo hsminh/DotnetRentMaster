@@ -1,10 +1,10 @@
 using RentMaster.Core.File;
 using RentMaster.Core.Cloudinary;
+using RentMaster.Management.RealEstate.Services;
 using RentMaster.partner.Storage.Interface;
 using RentMaster.RealEstate.Repositories;
-using RentMaster.RealEstate.Services;
 
-namespace RentMaster.RealEstate
+namespace RentMaster.Management.RealEstate
 {
     public static class DependencyInjection
     {

@@ -1,4 +1,4 @@
-using RentMaster.Core.Auth;
+using RentMaster.Core.Backend.Auth;
 
 namespace RentMaster.Accounts.Models;
 using System.ComponentModel.DataAnnotations.Schema;

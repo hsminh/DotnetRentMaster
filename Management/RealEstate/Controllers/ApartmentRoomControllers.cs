@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
-using RentMaster.Accounts.Models;
 using RentMaster.Core.Controllers;
 using RentMaster.Core.Middleware;
 using RentMaster.RealEstate.Models;
-using RentMaster.RealEstate.Services;
 using RentMaster.RealEstate.Types.Request;
 using FluentValidation;
+using RentMaster.Accounts.LandLords.Models;
+using RentMaster.Management.RealEstate.Services;
 
-namespace RentMaster.RealEstate.Controllers;
+namespace RentMaster.Management.RealEstate.Controllers;
 
 [ApiController]
 [Attributes.LandLordScope]

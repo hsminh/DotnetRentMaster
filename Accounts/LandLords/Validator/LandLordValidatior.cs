@@ -1,6 +1,5 @@
-using RentMaster.Accounts.Repositories;
-
-namespace RentMaster.Accounts.Validator
+using RentMaster.Accounts.LandLords.Repositories;
+namespace RentMaster.Accounts.LandLords.Validator
 {
     public class LandLordValidator
     {

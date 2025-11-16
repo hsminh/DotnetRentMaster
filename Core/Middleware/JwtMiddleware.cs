@@ -2,7 +2,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using RentMaster.Core.Auth.Types;
+using RentMaster.Core.Backend.Auth.Types.enums;
+using RentMaster.Core.types.enums;
 using RentMaster.Data;
 
 namespace RentMaster.Core.Middleware;
@@ -68,7 +69,14 @@ public class JwtMiddleware
                 return;
             }
 
-            var user = await GetUserByRoleAsync(db, uid, role);
+            if (!Enum.TryParse<UserTypes>(role, out var roleEnum))
+            {
+                context.Response.StatusCode = 401;
+                await context.Response.WriteAsync("Invalid role");
+                return;
+            }
+
+            var user = await GetUserByRoleAsync(db, uid, roleEnum);
             if (user == null)
             {
                 context.Response.StatusCode = 401;
@@ -113,14 +121,24 @@ public class JwtMiddleware
         return (JwtSecurityToken)validatedToken;
     }
 
-    private async Task<object?> GetUserByRoleAsync(AppDbContext db, Guid uid, string? role)
+private async Task<object?> GetUserByRoleAsync(AppDbContext db, Guid uid, UserTypes role)
+{
+    switch (role)
     {
-        return role switch
-        {
-            nameof(UserTypes.Admin) => await db.Admins.FirstOrDefaultAsync(u => u.Uid == uid),
-            nameof(UserTypes.LandLord) => await db.LandLords.FirstOrDefaultAsync(u => u.Uid == uid),
-            nameof(UserTypes.Consumer) => await db.Consumers.FirstOrDefaultAsync(u => u.Uid == uid),
-            _ => null
-        };
+        case UserTypes.Admin:
+            return await db.Admins
+                .FirstOrDefaultAsync(u => u.Uid == uid && u.Status == UserStatus.Active.ToString());
+
+        case UserTypes.LandLord:
+            return await db.LandLords
+                .FirstOrDefaultAsync(u => u.Uid == uid && u.Status == UserStatus.Active.ToString());
+
+        case UserTypes.Consumer:
+            return await db.Consumers
+                .FirstOrDefaultAsync(u => u.Uid == uid && u.Status == UserStatus.Active.ToString());
+
+        default:
+            return null;
     }
+}
 }

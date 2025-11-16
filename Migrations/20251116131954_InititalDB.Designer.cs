@@ -13,8 +13,8 @@ using RentMaster.Data;
 namespace RentMaster.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251109131158_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251116131954_InititalDB")]
+    partial class InititalDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,7 +26,7 @@ namespace RentMaster.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("RentMaster.Accounts.Models.Admin", b =>
+            modelBuilder.Entity("RentMaster.Accounts.Admin.Models.Admin", b =>
                 {
                     b.Property<Guid>("Uid")
                         .ValueGeneratedOnAdd()
@@ -64,12 +64,66 @@ namespace RentMaster.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Uid");
 
                     b.ToTable("admin");
+                });
+
+            modelBuilder.Entity("RentMaster.Accounts.LandLords.Models.LandLord", b =>
+                {
+                    b.Property<Guid>("Uid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Gmail")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Uid");
+
+                    b.ToTable("landlord");
                 });
 
             modelBuilder.Entity("RentMaster.Accounts.Models.Consumer", b =>
@@ -110,6 +164,10 @@ namespace RentMaster.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -118,11 +176,15 @@ namespace RentMaster.Migrations
                     b.ToTable("consumer");
                 });
 
-            modelBuilder.Entity("RentMaster.Accounts.Models.LandLord", b =>
+            modelBuilder.Entity("RentMaster.Addresses.Models.AddressDivision", b =>
                 {
                     b.Property<Guid>("Uid")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -130,29 +192,27 @@ namespace RentMaster.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Gmail")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTime?>("DeprecatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDelete")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("LastName")
+                    b.Property<bool>("IsDeprecated")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("ParentId")
+                        .HasColumnType("text");
+
+                    b.PrimitiveCollection<List<string>>("PreviousUnitCodes")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text[]");
 
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Scope")
+                    b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -161,7 +221,73 @@ namespace RentMaster.Migrations
 
                     b.HasKey("Uid");
 
-                    b.ToTable("landlord");
+                    b.ToTable("address_division");
+                });
+
+            modelBuilder.Entity("RentMaster.Management.Tenant.Models.Tenant", b =>
+                {
+                    b.Property<Guid>("Uid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ApartmentRoomUid")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ApartmentUid")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal?>("DepositAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal?>("MonthlyRent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<Guid>("OwnerUid")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserUid")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Uid");
+
+                    b.HasIndex("ApartmentRoomUid");
+
+                    b.HasIndex("ApartmentUid");
+
+                    b.HasIndex("UserUid");
+
+                    b.ToTable("tenants");
                 });
 
             modelBuilder.Entity("RentMaster.RealEstate.Models.Apartment", b =>
@@ -285,6 +411,29 @@ namespace RentMaster.Migrations
                     b.HasKey("Uid");
 
                     b.ToTable("apartment_rooms");
+                });
+
+            modelBuilder.Entity("RentMaster.Management.Tenant.Models.Tenant", b =>
+                {
+                    b.HasOne("RentMaster.RealEstate.Models.ApartmentRoom", "ApartmentRoom")
+                        .WithMany()
+                        .HasForeignKey("ApartmentRoomUid");
+
+                    b.HasOne("RentMaster.RealEstate.Models.Apartment", "Apartment")
+                        .WithMany()
+                        .HasForeignKey("ApartmentUid");
+
+                    b.HasOne("RentMaster.Accounts.Models.Consumer", "User")
+                        .WithMany()
+                        .HasForeignKey("UserUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Apartment");
+
+                    b.Navigation("ApartmentRoom");
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

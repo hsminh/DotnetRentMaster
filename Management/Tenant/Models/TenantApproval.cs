@@ -1,3 +1,5 @@
+using RentMaster.Accounts.LandLords.Models;
+
 namespace RentMaster.Management.Tenant.Models;
 using RentMaster.Core.Models;
 using System.ComponentModel.DataAnnotations;
@@ -18,7 +20,7 @@ public class TenantApproval : BaseModel
     public Guid LandlordUid { get; set; }
 
     [ForeignKey(nameof(LandlordUid))]
-    public virtual Accounts.Models.LandLord Landlord { get; set; } = null!;
+    public virtual LandLord Landlord { get; set; } = null!;
 
     [Required]
     public Guid OwnerUid { get; set; }

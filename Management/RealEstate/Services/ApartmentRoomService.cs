@@ -1,4 +1,4 @@
-using RentMaster.Accounts.Models;
+using RentMaster.Accounts.LandLords.Models;
 using RentMaster.Core.File;
 using RentMaster.Core.Services;
 using RentMaster.Core.types.enums;
@@ -6,7 +6,7 @@ using RentMaster.RealEstate.Models;
 using RentMaster.RealEstate.Repositories;
 using RentMaster.RealEstate.Types.Request;
 
-namespace RentMaster.RealEstate.Services;
+namespace RentMaster.Management.RealEstate.Services;
 
 public class ApartmentRoomService : BaseService<ApartmentRoom>
 {

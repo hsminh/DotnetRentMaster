@@ -1,8 +1,8 @@
-using RentMaster.Accounts.Models;
+using RentMaster.Accounts.LandLords.Models;
 using RentMaster.Core.Repositories;
 using RentMaster.Data;
 
-namespace RentMaster.Accounts.Repositories
+namespace RentMaster.Accounts.LandLords.Repositories
 {
     public class LandLordRepository: BaseRepository<LandLord>
     {

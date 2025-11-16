@@ -1,13 +1,14 @@
 using System.Text;
-using Microsoft.EntityFrameworkCore;
-using RentMaster.Core.Auth.Interface;
 using RentMaster.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using RentMaster.Core.Auth.Types;
+using RentMaster.Core.Backend.Auth.Interface;
+using RentMaster.Core.Backend.Auth.Types.enums;
+using RentMaster.Core.types.enums;
 
-namespace RentMaster.Core.Auth.service;
+namespace RentMaster.Core.Backend.Auth.service;
 
 public class AuthService : IAuthService
 {
@@ -70,11 +71,19 @@ public class AuthService : IAuthService
         
         private async Task<BaseAuth?> GetUserByTypeAsync(string gmail, UserTypes type)
         {
+            var activeStatus = UserStatus.Active.ToString();
+
             return type switch
             {
-                UserTypes.Consumer => await _context.Consumers.FirstOrDefaultAsync(u => u.Gmail == gmail),
-                UserTypes.Admin => await _context.Admins.FirstOrDefaultAsync(u => u.Gmail == gmail),
-                UserTypes.LandLord => await _context.LandLords.FirstOrDefaultAsync(u => u.Gmail == gmail),
+                UserTypes.Consumer => await _context.Consumers
+                    .FirstOrDefaultAsync(u => u.Gmail == gmail && u.Status == activeStatus),
+
+                UserTypes.Admin => await _context.Admins
+                    .FirstOrDefaultAsync(u => u.Gmail == gmail && u.Status == activeStatus),
+
+                UserTypes.LandLord => await _context.LandLords
+                    .FirstOrDefaultAsync(u => u.Gmail == gmail && u.Status == activeStatus),
+
                 _ => null
             };
         }

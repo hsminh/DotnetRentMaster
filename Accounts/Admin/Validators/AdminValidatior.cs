@@ -1,6 +1,6 @@
-using RentMaster.Accounts.Repositories;
+using RentMaster.Accounts.Admin.Repositories;
 
-namespace RentMaster.Accounts.Validator
+namespace RentMaster.Accounts.Admin.Validators
 {
     public class AdminValidator
     {
