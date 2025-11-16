@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using RentMaster.Core.Models;
 using RentMaster.Core.types.enums;
 
@@ -20,6 +21,7 @@ public abstract class BaseAuth : BaseModel
 
     public string LastName { get; set; } = string.Empty;
     
+    [JsonPropertyName("Status")]
     public string Status { get; set; } = UserStatus.Active.ToString();
 
     [Phone]
