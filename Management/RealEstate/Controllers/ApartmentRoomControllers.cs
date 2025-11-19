@@ -2,10 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using RentMaster.Core.Controllers;
 using RentMaster.Core.Middleware;
 using RentMaster.RealEstate.Models;
-using RentMaster.RealEstate.Types.Request;
 using FluentValidation;
 using RentMaster.Accounts.LandLords.Models;
 using RentMaster.Management.RealEstate.Services;
+using RentMaster.Management.RealEstate.Types.Request;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace RentMaster.Management.RealEstate.Controllers;
 
@@ -21,8 +24,8 @@ public class ApartmentRoomController : BaseController<ApartmentRoom>
         ApartmentRoomService service,
         IValidator<ApartmentRoomCreateRequest> validator) : base(service)
     {
-        _service = service;
-        _validator = validator;
+        _service = service ?? throw new ArgumentNullException(nameof(service));
+        _validator = validator ?? throw new ArgumentNullException(nameof(validator));
     }
 
     [HttpGet]
@@ -52,7 +55,8 @@ public class ApartmentRoomController : BaseController<ApartmentRoom>
         {
             return BadRequest(new
             {
-                Message = "Validation_failed",
+                StatusCode = StatusCodes.Status400BadRequest,
+                Message = "Validation failed",
                 Errors = validationResult.Errors.Select(e => new
                 {
                     Field = e.PropertyName,
@@ -61,13 +65,27 @@ public class ApartmentRoomController : BaseController<ApartmentRoom>
             });
         }
 
-        var landlord = HttpContext.GetCurrentUser<LandLord>();
-        var room = await _service.CreateApartmentRoomAsync(landlord, request);
-        return Ok(new
+        try
         {
-            Message = "ApartmentRoom_created_successfully",
-            Data = room
-        });
+            var landlord = HttpContext.GetCurrentUser<LandLord>();
+            var room = await _service.CreateApartmentRoomAsync(landlord, request);
+            
+            return Ok(new
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Message = "Apartment room created successfully",
+                Data = room
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                StatusCode = StatusCodes.Status500InternalServerError,
+                Message = "An error occurred while creating the apartment room",
+                Error = ex.Message
+            });
+        }
     }
 
     [HttpPut("{id}")]
@@ -80,7 +98,8 @@ public class ApartmentRoomController : BaseController<ApartmentRoom>
         {
             return BadRequest(new
             {
-                Message = "Validation_failed",
+                StatusCode = StatusCodes.Status400BadRequest,
+                Message = "Validation failed",
                 Errors = validationResult.Errors.Select(e => new
                 {
                     Field = e.PropertyName,
@@ -89,15 +108,36 @@ public class ApartmentRoomController : BaseController<ApartmentRoom>
             });
         }
 
-        var landlord = HttpContext.GetCurrentUser<LandLord>();
-        var room = await _service.UpdateApartmentRoomAsync(landlord, id, request);
-
-        if (room == null) return NotFound(new { message = "ApartmentRoom_not_found" });
-        return Ok(new
+        try
         {
-            Message = "ApartmentRoom_updated_successfully",
-            Data = room
-        });
+            var landlord = HttpContext.GetCurrentUser<LandLord>();
+            var room = await _service.UpdateApartmentRoomAsync(landlord, id, request);
+
+            if (room == null) 
+            {
+                return NotFound(new 
+                { 
+                    StatusCode = StatusCodes.Status404NotFound,
+                    Message = "Apartment room not found" 
+                });
+            }
+            
+            return Ok(new
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Message = "Apartment room updated successfully",
+                Data = room
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                StatusCode = StatusCodes.Status500InternalServerError,
+                Message = "An error occurred while updating the apartment room",
+                Error = ex.Message
+            });
+        }
     }
     [NonAction]
     public override async Task<IActionResult> Update(Guid id, [FromBody] ApartmentRoom model)

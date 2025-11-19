@@ -1,53 +1,100 @@
 using Microsoft.AspNetCore.Mvc;
-using RentMaster.Accounts.LandLords.Models;
 using RentMaster.Core.Controllers;
 using RentMaster.Core.Middleware;
+using RentMaster.Accounts.LandLords.Models;
 using RentMaster.Management.RealEstate.Services;
-using RentMaster.RealEstate.Models;
-using RentMaster.RealEstate.Types.Request;
+using RentMaster.Management.RealEstate.Types.Request;
+using RentMaster.Management.RealEstate.Models;
+using FluentValidation;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace RentMaster.Management.RealEstate.Controllers;
 
 [ApiController]
 [Attributes.LandLordScope]
-[Route("landlords/api/[controller]")]
+[Route("landlords/api/apartment")]
 public class ApartmentController : BaseController<Apartment>
 {
-    private readonly ApartmentService _apartmentService;
+    private readonly ApartmentService _service;
+    private readonly IValidator<ApartmentCreateRequest> _validator;
 
-    public ApartmentController(ApartmentService apartmentService)
-        : base(apartmentService)
+    public ApartmentController(
+        ApartmentService service,
+        IValidator<ApartmentCreateRequest> validator) : base(service)
     {
-        _apartmentService = apartmentService;
+        _service = service ?? throw new ArgumentNullException(nameof(service));
+        _validator = validator ?? throw new ArgumentNullException(nameof(validator));
     }
-    
+
     [HttpGet]
     public override async Task<IActionResult> GetAll()
     {
         var landlord = HttpContext.GetCurrentUser<LandLord>();
-        var apartments = await _apartmentService.getApartments(landlord);
+        var apartments = await _service.getApartments(landlord);
         return Ok(apartments);
     }
-    
+
+    [HttpGet("{id}")]
+    public override async Task<IActionResult> GetByUid(Guid id)
+    {
+        var landlord = HttpContext.GetCurrentUser<LandLord>();
+        var apartment = await _service.GetApartment(landlord, id);
+
+        if (apartment == null)
+            return NotFound(new { message = "Apartment_not_found" });
+
+        return Ok(apartment);
+    }
+
     [HttpPost]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(50_000_000)]
     public async Task<IActionResult> Create([FromForm] ApartmentCreateRequest request)
     {
-        var landlord = HttpContext.GetCurrentUser<LandLord>();
-        var result = await _apartmentService.CreateApartmentAsync(landlord, request);
-
-        return Ok(new
+        var validationResult = await _validator.ValidateAsync(request);
+        if (!validationResult.IsValid)
         {
-            Message = "apartment_created_successfully",
-            Data = result
-        });
-    }
+            return BadRequest(new
+            {
+                StatusCode = StatusCodes.Status400BadRequest,
+                Message = "Validation failed",
+                Errors = validationResult.Errors.Select(e => new
+                {
+                    Field = e.PropertyName,
+                    Error = e.ErrorMessage
+                })
+            });
+        }
 
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public override async Task<IActionResult> Create([FromBody] Apartment model)
+        try
+        {
+            var landlord = HttpContext.GetCurrentUser<LandLord>();
+            var apartment = await _service.CreateApartmentAsync(landlord, request);
+
+            return Ok(new
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Message = "Apartment created successfully",
+                Data = apartment
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                StatusCode = StatusCodes.Status500InternalServerError,
+                Message = "An error occurred while creating the apartment",
+                Error = ex.Message
+            });
+        }
+    }
+    [NonAction]
+    public override async Task<IActionResult> Update(Guid id, [FromBody] Apartment model)
     {
-        return await base.Create(model);
+        return await base.Update(id, model);
     }
     
     [HttpPut("{id}")]
@@ -55,33 +102,50 @@ public class ApartmentController : BaseController<Apartment>
     [RequestSizeLimit(50_000_000)]
     public async Task<IActionResult> Update(Guid id, [FromForm] ApartmentCreateRequest request)
     {
-        var landlord = HttpContext.GetCurrentUser<LandLord>();
-        var result = await _apartmentService.UpdateApartment(landlord, id, request);
-
-        return Ok(new
+        var validationResult = await _validator.ValidateAsync(request);
+        if (!validationResult.IsValid)
         {
-            Message = "apartment_updated_successfully",
-            Data = result
-        });
-    }
+            return BadRequest(new
+            {
+                StatusCode = StatusCodes.Status400BadRequest,
+                Message = "Validation failed",
+                Errors = validationResult.Errors.Select(e => new
+                {
+                    Field = e.PropertyName,
+                    Error = e.ErrorMessage
+                })
+            });
+        }
 
-    [NonAction]
-    public override async Task<IActionResult> Update(Guid id, [FromBody] Apartment model)
-    {
-        return await base.Update(id, model);
-    }
-    
-    
-    [HttpGet("{id}")]
-    public override async Task<IActionResult> GetByUid(Guid id)
-    {
-        var landlord = HttpContext.GetCurrentUser<LandLord>();
-        var apartment = await _apartmentService.GetApartment(landlord, id);
+        try
+        {
+            var landlord = HttpContext.GetCurrentUser<LandLord>();
+            var apartment = await _service.UpdateApartment(landlord, id, request);
 
-        if (apartment == null)
-            return NotFound(new { message = "apartment_not_found" });
+            if (apartment == null)
+            {
+                return NotFound(new
+                {
+                    StatusCode = StatusCodes.Status404NotFound,
+                    Message = "Apartment not found"
+                });
+            }
 
-        return Ok(apartment);
+            return Ok(new
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Message = "Apartment updated successfully",
+                Data = apartment
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                StatusCode = StatusCodes.Status500InternalServerError,
+                Message = "An error occurred while updating the apartment",
+                Error = ex.Message
+            });
+        }
     }
-    
-} 
+}

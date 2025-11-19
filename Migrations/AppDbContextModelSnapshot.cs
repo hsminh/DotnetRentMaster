@@ -63,7 +63,8 @@ namespace RentMaster.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasAnnotation("Relational:JsonPropertyName", "Status");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -113,7 +114,8 @@ namespace RentMaster.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasAnnotation("Relational:JsonPropertyName", "Status");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -163,7 +165,8 @@ namespace RentMaster.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasAnnotation("Relational:JsonPropertyName", "Status");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -219,6 +222,87 @@ namespace RentMaster.Migrations
                     b.HasKey("Uid");
 
                     b.ToTable("address_division");
+                });
+
+            modelBuilder.Entity("RentMaster.Management.RealEstate.Models.Apartment", b =>
+                {
+                    b.Property<Guid>("Uid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AddressDivisionUid")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("AreaLength")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("AreaWidth")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.PrimitiveCollection<List<string>>("Images")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("LandlordUid")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("MetaData")
+                        .HasMaxLength(4000)
+                        .HasColumnType("varchar(4000)");
+
+                    b.Property<string>("Pid")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)");
+
+                    b.Property<decimal?>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("ProvinceDivisionUid")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<int?>("TotalFloors")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("WardDivisionUid")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Uid");
+
+                    b.HasIndex("ProvinceDivisionUid");
+
+                    b.HasIndex("WardDivisionUid");
+
+                    b.ToTable("apartments");
                 });
 
             modelBuilder.Entity("RentMaster.Management.Tenant.Models.Tenant", b =>
@@ -287,73 +371,6 @@ namespace RentMaster.Migrations
                     b.ToTable("tenants");
                 });
 
-            modelBuilder.Entity("RentMaster.RealEstate.Models.Apartment", b =>
-                {
-                    b.Property<Guid>("Uid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("AddressDivisionUid")
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal?>("AreaLength")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("AreaWidth")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.PrimitiveCollection<List<string>>("Images")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
-                    b.Property<bool>("IsDelete")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid>("LandlordUid")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Pid")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("character varying(15)");
-
-                    b.Property<decimal?>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<int?>("TotalFloors")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Uid");
-
-                    b.ToTable("Apartments");
-                });
-
             modelBuilder.Entity("RentMaster.RealEstate.Models.ApartmentRoom", b =>
                 {
                     b.Property<Guid>("Uid")
@@ -389,8 +406,15 @@ namespace RentMaster.Migrations
                     b.Property<Guid>("LandlordUid")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("MetaData")
+                        .HasMaxLength(4000)
+                        .HasColumnType("varchar(4000)");
+
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("ProvinceDivisionUid")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("RoomNumber")
                         .IsRequired()
@@ -405,9 +429,31 @@ namespace RentMaster.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("WardDivisionUid")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Uid");
 
+                    b.HasIndex("ProvinceDivisionUid");
+
+                    b.HasIndex("WardDivisionUid");
+
                     b.ToTable("apartment_rooms");
+                });
+
+            modelBuilder.Entity("RentMaster.Management.RealEstate.Models.Apartment", b =>
+                {
+                    b.HasOne("RentMaster.Addresses.Models.AddressDivision", "Province")
+                        .WithMany()
+                        .HasForeignKey("ProvinceDivisionUid");
+
+                    b.HasOne("RentMaster.Addresses.Models.AddressDivision", "Ward")
+                        .WithMany()
+                        .HasForeignKey("WardDivisionUid");
+
+                    b.Navigation("Province");
+
+                    b.Navigation("Ward");
                 });
 
             modelBuilder.Entity("RentMaster.Management.Tenant.Models.Tenant", b =>
@@ -416,7 +462,7 @@ namespace RentMaster.Migrations
                         .WithMany()
                         .HasForeignKey("ApartmentRoomUid");
 
-                    b.HasOne("RentMaster.RealEstate.Models.Apartment", "Apartment")
+                    b.HasOne("RentMaster.Management.RealEstate.Models.Apartment", "Apartment")
                         .WithMany()
                         .HasForeignKey("ApartmentUid");
 
@@ -431,6 +477,21 @@ namespace RentMaster.Migrations
                     b.Navigation("ApartmentRoom");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("RentMaster.RealEstate.Models.ApartmentRoom", b =>
+                {
+                    b.HasOne("RentMaster.Addresses.Models.AddressDivision", "Province")
+                        .WithMany()
+                        .HasForeignKey("ProvinceDivisionUid");
+
+                    b.HasOne("RentMaster.Addresses.Models.AddressDivision", "Ward")
+                        .WithMany()
+                        .HasForeignKey("WardDivisionUid");
+
+                    b.Navigation("Province");
+
+                    b.Navigation("Ward");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,17 +1,20 @@
 using FluentValidation;
-using RentMaster.RealEstate.Types.Request;
+using RentMaster.Addresses.Repostiories;
+using RentMaster.Management.RealEstate.Types.Request;
 
-namespace RentMaster.RealEstate.Validators
+namespace RentMaster.Management.RealEstate.Validators
 {
     public class ApartmentRoomValidator : AbstractValidator<ApartmentRoomCreateRequest>
     {
         private readonly ApartmentRepository _apartmentRepository;
+        private readonly AddressDivisionRepository _addressRepository;
 
-        public ApartmentRoomValidator(ApartmentRepository apartmentRoomRepository)
+        public ApartmentRoomValidator(ApartmentRepository apartmentRoomRepository,AddressDivisionRepository addressRepository)
         {
             _apartmentRepository = apartmentRoomRepository ?? 
                                    throw new ArgumentNullException(nameof(apartmentRoomRepository));
-
+            _addressRepository = addressRepository ??
+                                 throw new ArgumentNullException(nameof(addressRepository));
             RuleFor(x => x.ApartmentUid)
                 .NotEmpty().WithMessage("ApartmentUid is required.");
 
@@ -23,6 +26,20 @@ namespace RentMaster.RealEstate.Validators
                 .WithMessage("This room already exists in the apartment.");
         }
 
+        // Province synchronous check
+        private bool ProvinceExists(Guid provinceUid)
+        {
+            var provinces = _addressRepository.Filter(d => d.Type == "province");
+            return provinces.Any(p => p.Uid == provinceUid);
+        }
+
+        // Ward synchronous check
+        private bool WardExists(Guid wardUid)
+        {
+            var provinces = _addressRepository.Filter(d => d.Type == "ward");
+            return provinces.Any(p => p.Uid == wardUid);
+        }
+        
         private bool RoomDoesNotExist(ApartmentRoomCreateRequest request)
         {
             if (request == null)

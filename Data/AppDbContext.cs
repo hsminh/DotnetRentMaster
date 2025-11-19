@@ -3,6 +3,7 @@ using RentMaster.Accounts.Admin.Models;
 using RentMaster.Accounts.LandLords.Models;
 using RentMaster.Accounts.Models;
 using RentMaster.Addresses.Models;
+using RentMaster.Management.RealEstate.Models;
 using RentMaster.Management.Tenant.Models;
 using RentMaster.RealEstate.Models;
 

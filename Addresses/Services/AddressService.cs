@@ -17,7 +17,7 @@ namespace RentMaster.Addresses.Services
         }
 
         public async Task<IEnumerable<AddressDivision>> GetAddressAsync(string type, string? parentCode = null)
-        {
+        {   
             if (string.IsNullOrEmpty(parentCode))
             {
                 return await _repository.FilterAsync(d => d.Type == type);

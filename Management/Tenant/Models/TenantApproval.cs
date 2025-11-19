@@ -1,4 +1,5 @@
 using RentMaster.Accounts.LandLords.Models;
+using RentMaster.Management.RealEstate.Models;
 
 namespace RentMaster.Management.Tenant.Models;
 using RentMaster.Core.Models;

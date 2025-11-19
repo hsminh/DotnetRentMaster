@@ -1,7 +1,8 @@
 using RentMaster.Core.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using RentMaster.RealEstate.Types.Request;
+using RentMaster.Addresses.Models;
+using RentMaster.Management.RealEstate.Types.Request;
 
 namespace RentMaster.RealEstate.Models;
 
@@ -23,6 +24,15 @@ public class ApartmentRoom : BaseModel
     [Column(TypeName = "decimal(18,2)")]
     public decimal? AreaLength { get; set; }
 
+    public Guid? ProvinceDivisionUid { get; set; }
+
+    public Guid? WardDivisionUid { get; set; }
+
+    [MaxLength(4000)]
+    [Column(TypeName = "varchar(4000)")]
+    public string? MetaData { get; set; }
+
+    
     [Column(TypeName = "decimal(18,2)")]
     public decimal? AreaWidth { get; set; }
 
@@ -33,6 +43,12 @@ public class ApartmentRoom : BaseModel
 
     public List<string> Images { get; set; } = new();
     public string Description { get; set; } = string.Empty;
+    
+    [ForeignKey(nameof(ProvinceDivisionUid))]
+    public AddressDivision? Province { get; set; }
+
+    [ForeignKey(nameof(WardDivisionUid))]
+    public AddressDivision? Ward { get; set; }
     public ApartmentRoom() {}
 
     public ApartmentRoom(ApartmentRoomCreateRequest request, Guid landlordUid, Guid apartmentUid, List<string>? imageUrls = null)
