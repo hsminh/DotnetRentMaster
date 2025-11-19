@@ -12,8 +12,8 @@ using RentMaster.Addresses;
 using RentMaster.Addresses.Commands;
 using RentMaster.Core.Backend.Auth;
 using RentMaster.Management.RealEstate;
+using RentMaster.Management.RealEstate.Validators;
 using RentMaster.Management.Tenant;
-using RentMaster.RealEstate.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +50,7 @@ builder.Services.AddTransient<AddressDataSeeder>();
 // ------------------------------
 builder.Services.AddControllers();
 builder.Services.AddValidatorsFromAssemblyContaining<ApartmentRoomValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ApartmentValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 // ------------------------------
 // Register custom modules

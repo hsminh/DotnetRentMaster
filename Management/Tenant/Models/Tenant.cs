@@ -1,6 +1,7 @@
 using RentMaster.Core.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using RentMaster.Management.RealEstate.Models;
 using RentMaster.RealEstate.Models;
 
 namespace RentMaster.Management.Tenant.Models;

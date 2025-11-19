@@ -1,8 +1,12 @@
+using FluentValidation;
 using RentMaster.Core.File;
 using RentMaster.Core.Cloudinary;
 using RentMaster.Management.RealEstate.Services;
+using RentMaster.Management.RealEstate.Validators;
 using RentMaster.partner.Storage.Interface;
 using RentMaster.RealEstate.Repositories;
+using RentMaster.Addresses.Services;
+using RentMaster.Management.RealEstate.Types.Request;
 
 namespace RentMaster.Management.RealEstate
 {

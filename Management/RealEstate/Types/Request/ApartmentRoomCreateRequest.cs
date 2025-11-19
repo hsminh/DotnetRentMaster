@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RentMaster.RealEstate.Types.Request
+namespace RentMaster.Management.RealEstate.Types.Request
 {
     public class ApartmentRoomCreateRequest
     {
@@ -25,6 +25,11 @@ namespace RentMaster.RealEstate.Types.Request
         
         public string Description { get; set; } = string.Empty;
         
+        public Guid? ProvinceDivisionUid { get; set; }
+
+        public Guid? WardDivisionUid { get; set; }
+
+        public string? MetaData { get; set; }
         // Multiple image files for the room
         public List<IFormFile>? Files { get; set; } = new List<IFormFile>();
     }

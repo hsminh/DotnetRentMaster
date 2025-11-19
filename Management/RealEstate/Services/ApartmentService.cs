@@ -2,8 +2,8 @@ using RentMaster.Accounts.LandLords.Models;
 using RentMaster.Core.File;
 using RentMaster.Core.Services;
 using RentMaster.Core.types.enums;
-using RentMaster.RealEstate.Models;
-using RentMaster.RealEstate.Types.Request;
+using RentMaster.Management.RealEstate.Models;
+using RentMaster.Management.RealEstate.Types.Request;
 
 namespace RentMaster.Management.RealEstate.Services;
 
