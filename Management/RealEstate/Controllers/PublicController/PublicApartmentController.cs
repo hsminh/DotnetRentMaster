@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using RentMaster.Management.RealEstate.Services;
 using RentMaster.Management.RealEstate.Models;
+using RentMaster.Management.RealEstate.Types.Response;
 
 namespace RentMaster.Management.RealEstate.Controllers.PublicController
 {
     [ApiController]
-    [Route("public")]
+    [Route("public/api")]
     public class PublicApartmentController : ControllerBase
     {
         private readonly ApartmentService _service;
@@ -19,9 +20,10 @@ namespace RentMaster.Management.RealEstate.Controllers.PublicController
         }
 
         [HttpGet("apartments")]
-        public async Task<IEnumerable<Apartment>> GetFullApartments()
+        public async Task<IActionResult> GetFullApartments()
         {
-            return await _service.GetFullApartments();
+            var apartments = await _service.GetFullApartments();
+            return Ok(apartments);
         }
         [HttpGet("apartment-rooms")]
         public async Task<IEnumerable<ApartmentRoom>> GetAllRooms()

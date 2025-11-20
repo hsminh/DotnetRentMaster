@@ -1,9 +1,13 @@
+using Microsoft.EntityFrameworkCore;
 using RentMaster.Accounts.LandLords.Models;
+using RentMaster.Addresses.Models;
 using RentMaster.Core.File;
 using RentMaster.Core.Services;
 using RentMaster.Core.types.enums;
+using RentMaster.Data;
 using RentMaster.Management.RealEstate.Models;
 using RentMaster.Management.RealEstate.Types.Request;
+using RentMaster.Management.RealEstate.Types.Response;
 
 namespace RentMaster.Management.RealEstate.Services;
 
@@ -11,12 +15,14 @@ public class ApartmentService : BaseService<Apartment>
 {
     private readonly ApartmentRepository _apartmentRepository;
     private readonly FileService _fileService;
+    private readonly AppDbContext _context;
 
-    public ApartmentService(ApartmentRepository apartmentRepository, FileService fileService)
+    public ApartmentService(ApartmentRepository apartmentRepository, FileService fileService, AppDbContext context)
         : base(apartmentRepository)
     {
         _apartmentRepository = apartmentRepository;
         _fileService = fileService;
+        _context = context;
     }
     
     public async Task<IEnumerable<Apartment>> getApartments(LandLord landlord)
@@ -74,10 +80,40 @@ public class ApartmentService : BaseService<Apartment>
         var apartment = new Apartment(request, landLord.Uid, imageUrls);
         return await _apartmentRepository.CreateAsync(apartment);
     }
-    public async Task<IEnumerable<Apartment>> GetFullApartments()
+    public async Task<IEnumerable<ApartmentResponse>> GetFullApartments()
     {
-        return await _apartmentRepository.FilterAsync(a => 
-            a.IsDelete == false && 
-            a.Type == ApartmentType.FullApartment.ToString());
+        var apartments = await _apartmentRepository.FilterAsync(
+            a => !a.IsDelete && a.Type == ApartmentType.FullApartment.ToString());
+        
+        // Get all unique province and ward IDs
+        var provinceIds = apartments.Select(a => a.ProvinceDivisionUid).Where(id => id.HasValue).Cast<Guid>().ToList();
+        var wardIds = apartments.Select(a => a.WardDivisionUid).Where(id => id.HasValue).Cast<Guid>().ToList();
+        
+        // Load all related entities in one query each
+        var provinces = await _context.AddressDivisions
+            .Where(a => provinceIds.Contains(a.Uid))
+            .ToDictionaryAsync(a => a.Uid);
+            
+        var wards = await _context.AddressDivisions
+            .Where(a => wardIds.Contains(a.Uid))
+            .ToDictionaryAsync(a => a.Uid);
+        
+        // Assign related entities
+        foreach (var apartment in apartments)
+        {
+            if (apartment.ProvinceDivisionUid.HasValue && 
+                provinces.TryGetValue(apartment.ProvinceDivisionUid.Value, out var province))
+            {
+                apartment.Province = province;
+            }
+            
+            if (apartment.WardDivisionUid.HasValue && 
+                wards.TryGetValue(apartment.WardDivisionUid.Value, out var ward))
+            {
+                apartment.Ward = ward;
+            }
+        }
+            
+        return apartments.Select(ApartmentResponse.FromApartment);
     }
 }
