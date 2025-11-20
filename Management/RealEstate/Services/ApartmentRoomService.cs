@@ -66,5 +66,10 @@ namespace RentMaster.Management.RealEstate.Services
             await _apartmentRoomRepository.UpdateAsync(room);
             return room;
         }
+        public async Task<IEnumerable<ApartmentRoom>> GetAllRooms()
+        {
+            return await _apartmentRoomRepository.FilterAsync(a => !a.IsDelete);
+        }
     }
+    
 }

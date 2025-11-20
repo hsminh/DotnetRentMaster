@@ -74,4 +74,10 @@ public class ApartmentService : BaseService<Apartment>
         var apartment = new Apartment(request, landLord.Uid, imageUrls);
         return await _apartmentRepository.CreateAsync(apartment);
     }
+    public async Task<IEnumerable<Apartment>> GetFullApartments()
+    {
+        return await _apartmentRepository.FilterAsync(a => 
+            a.IsDelete == false && 
+            a.Type == ApartmentType.FullApartment.ToString());
+    }
 }

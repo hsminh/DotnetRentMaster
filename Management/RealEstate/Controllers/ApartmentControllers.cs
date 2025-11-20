@@ -6,10 +6,6 @@ using RentMaster.Management.RealEstate.Services;
 using RentMaster.Management.RealEstate.Types.Request;
 using RentMaster.Management.RealEstate.Models;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace RentMaster.Management.RealEstate.Controllers;
 
