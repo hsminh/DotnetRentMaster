@@ -1,9 +1,18 @@
 using Microsoft.AspNetCore.Http;
+using System;
 
 namespace RentMaster.Management.RealEstate.Types.Request
 {
     public class ApartmentCreateRequest
     {
+        public override string ToString()
+        {
+            return $"Price: {Price}, Title: {Title}, Description: {Description}, " +
+                   $"AreaLength: {AreaLength}, AreaWidth: {AreaWidth}, Type: {Type}, " +
+                   $"Status: {Status}, ProvinceDivisionUid: {ProvinceDivisionUid}, " +
+                   $"WardDivisionUid: {WardDivisionUid}, MetaData: {MetaData}, " +
+                   $"FilesCount: {Files?.Count ?? 0}";
+        }
         public decimal Price { get; set; }
 
         public string Title { get; set; } = string.Empty;

@@ -1,14 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using RentMaster.Core.Controllers;
 using RentMaster.Core.Middleware;
-using RentMaster.RealEstate.Models;
 using FluentValidation;
 using RentMaster.Accounts.LandLords.Models;
 using RentMaster.Management.RealEstate.Services;
 using RentMaster.Management.RealEstate.Types.Request;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
-using System.Linq;
+using RentMaster.Management.RealEstate.Models;
 
 namespace RentMaster.Management.RealEstate.Controllers;
 

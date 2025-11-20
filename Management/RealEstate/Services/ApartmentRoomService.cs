@@ -2,69 +2,69 @@ using RentMaster.Accounts.LandLords.Models;
 using RentMaster.Core.File;
 using RentMaster.Core.Services;
 using RentMaster.Core.types.enums;
+using RentMaster.Management.RealEstate.Models;
+using RentMaster.Management.RealEstate.Repositories;
 using RentMaster.Management.RealEstate.Types.Request;
-using RentMaster.RealEstate.Models;
-using RentMaster.RealEstate.Repositories;
 
-namespace RentMaster.Management.RealEstate.Services;
-
-public class ApartmentRoomService : BaseService<ApartmentRoom>
+namespace RentMaster.Management.RealEstate.Services
 {
-    private readonly ApartmentRoomRepository _apartmentRoomRepository;
-    private readonly FileService _fileService;
-
-    public ApartmentRoomService(ApartmentRoomRepository apartmentRoomRepository, FileService fileService)
-        : base(apartmentRoomRepository)
+    public class ApartmentRoomService : BaseService<ApartmentRoom>
     {
-        _apartmentRoomRepository = apartmentRoomRepository;
-        _fileService = fileService;
-    }
+        private readonly ApartmentRoomRepository _apartmentRoomRepository;
+        private readonly FileService _fileService;
 
-    public async Task<IEnumerable<ApartmentRoom>> GetApartmentRooms(LandLord landlord)
-    {
-        return await _apartmentRoomRepository.FilterAsync(a => a.LandlordUid == landlord.Uid);
-    }
-
-    public async Task<ApartmentRoom?> GetApartmentRoom(LandLord landlord, Guid uid)
-    {
-        return await _apartmentRoomRepository.GetAsync(a => a.LandlordUid == landlord.Uid && a.Uid == uid);
-    }
-
-    public async Task<ApartmentRoom> CreateApartmentRoomAsync(LandLord landlord, ApartmentRoomCreateRequest request)
-    {
-        var imageUrls = new List<string>();
-        if (request.Files != null && request.Files.Count > 0)
+        public ApartmentRoomService(ApartmentRoomRepository apartmentRoomRepository, FileService fileService)
+            : base(apartmentRoomRepository)
         {
-            foreach (var file in request.Files)
-            {
-                var uploadResult = await _fileService.UploadFileAsync(file, landlord.Uid, FileType.Image, FileScope.Public);
-                imageUrls.Add(uploadResult.Url);
-            }
+            _apartmentRoomRepository = apartmentRoomRepository;
+            _fileService = fileService;
         }
 
-        var room = new ApartmentRoom(request, landlord.Uid, request.ApartmentUid, imageUrls);
-        return await _apartmentRoomRepository.CreateAsync(room);
-    }
-
-    public async Task<ApartmentRoom?> UpdateApartmentRoomAsync(LandLord landlord, Guid uid, ApartmentRoomCreateRequest request)
-    {
-        var room = await _apartmentRoomRepository.GetAsync(a => a.LandlordUid == landlord.Uid && a.Uid == uid);
-        if (room == null)
-            return null;
-
-        List<string>? imageUrls = null;
-        if (request.Files != null && request.Files.Count > 0)
+        public async Task<IEnumerable<ApartmentRoom>> GetApartmentRooms(LandLord landlord)
         {
-            imageUrls = new List<string>();
-            foreach (var file in request.Files)
-            {
-                var uploadResult = await _fileService.UploadFileAsync(file, landlord.Uid, FileType.Image, FileScope.Public);
-                imageUrls.Add(uploadResult.Url);
-            }
+            return await _apartmentRoomRepository.FilterAsync(a => a.LandlordUid == landlord.Uid);
         }
 
-        room.UpdateFromRequest(request, imageUrls);
-        await _apartmentRoomRepository.UpdateAsync(room);
-        return room;
+        public async Task<ApartmentRoom?> GetApartmentRoom(LandLord landlord, Guid uid)
+        {
+            return await _apartmentRoomRepository.GetAsync(a => a.LandlordUid == landlord.Uid && a.Uid == uid);
+        }
+
+        public async Task<ApartmentRoom> CreateApartmentRoomAsync(LandLord landlord, ApartmentRoomCreateRequest request)
+        {
+            var imageUrls = new List<string>();
+            if (request.Files != null && request.Files.Count > 0)
+            {
+                foreach (var file in request.Files)
+                {
+                    var uploadResult = await _fileService.UploadFileAsync(file, landlord.Uid, FileType.Image, FileScope.Public);
+                    imageUrls.Add(uploadResult.Url);
+                }
+            }
+
+            var room = new ApartmentRoom(request, landlord.Uid, request.ApartmentUid, imageUrls);
+            return await _apartmentRoomRepository.CreateAsync(room);
+        }
+
+        public async Task<ApartmentRoom?> UpdateApartmentRoomAsync(LandLord landlord, Guid uid, ApartmentRoomCreateRequest request)
+        {
+            var room = await _apartmentRoomRepository.GetAsync(a => a.LandlordUid == landlord.Uid && a.Uid == uid);
+            if (room == null)
+                return null;
+
+            var imageUrls = new List<string>();
+            if (request.Files != null && request.Files.Count > 0)
+            {
+                foreach (var file in request.Files)
+                {
+                    var uploadResult = await _fileService.UploadFileAsync(file, landlord.Uid, FileType.Image, FileScope.Public);
+                    imageUrls.Add(uploadResult.Url);
+                }
+            }
+
+            room.UpdateFromRequest(request, imageUrls.Count > 0 ? imageUrls : null);
+            await _apartmentRoomRepository.UpdateAsync(room);
+            return room;
+        }
     }
 }

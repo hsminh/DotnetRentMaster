@@ -26,30 +26,17 @@ namespace RentMaster.Management.RealEstate.Validators
                 .WithMessage("This room already exists in the apartment.");
         }
 
-        // Province synchronous check
-        private bool ProvinceExists(Guid provinceUid)
-        {
-            var provinces = _addressRepository.Filter(d => d.Type == "province");
-            return provinces.Any(p => p.Uid == provinceUid);
-        }
-
-        // Ward synchronous check
-        private bool WardExists(Guid wardUid)
-        {
-            var provinces = _addressRepository.Filter(d => d.Type == "ward");
-            return provinces.Any(p => p.Uid == wardUid);
-        }
-        
         private bool RoomDoesNotExist(ApartmentRoomCreateRequest request)
         {
             if (request == null)
                 return false;
 
             var exists = _apartmentRepository.Filter(
-                a => a.Uid == request.ApartmentUid
+                a => a.Uid == request.ApartmentUid && a.IsDelete == false
             );
 
-            return exists.Count()!=0;
+            return exists.Count() != 0;
         }
+
     }
 }

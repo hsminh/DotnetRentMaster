@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Npgsql;
 using RentMaster.Addresses;
 using RentMaster.Addresses.Commands;
 using RentMaster.Core.Backend.Auth;
@@ -38,12 +39,15 @@ var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
 var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword}";
 
+
 // ------------------------------
 // Register DbContext
 // ------------------------------
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 builder.Services.AddTransient<AddressDataSeeder>();  
+// Enable dynamic JSON serialization BEFORE registering DbContext
+NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
 
 // ------------------------------
 // Register Controllers

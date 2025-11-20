@@ -1,10 +1,8 @@
-
-using System.Linq.Expressions;
 using RentMaster.Core.Repositories;
 using RentMaster.Data;
-using RentMaster.RealEstate.Models;
+using RentMaster.Management.RealEstate.Models;
 
-namespace RentMaster.RealEstate.Repositories;
+namespace RentMaster.Management.RealEstate.Repositories;
 
 public class ApartmentRoomRepository : BaseRepository<ApartmentRoom>
 {

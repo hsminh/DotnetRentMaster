@@ -5,7 +5,6 @@ namespace RentMaster.Management.Tenant.Models;
 using RentMaster.Core.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using RentMaster.RealEstate.Models;
 
 
 [Table("tenant_approvals")]

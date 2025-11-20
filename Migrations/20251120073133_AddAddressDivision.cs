@@ -57,6 +57,31 @@ namespace RentMaster.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "apartment_rooms",
+                columns: table => new
+                {
+                    Uid = table.Column<Guid>(type: "uuid", nullable: false),
+                    ApartmentUid = table.Column<Guid>(type: "uuid", nullable: false),
+                    LandlordUid = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoomNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Price = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
+                    AreaLength = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
+                    MetaData = table.Column<Dictionary<string, string>>(type: "jsonb", nullable: false),
+                    AreaWidth = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
+                    Status = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    Images = table.Column<List<string>>(type: "text[]", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDelete = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_apartment_rooms", x => x.Uid);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "consumer",
                 columns: table => new
                 {
@@ -98,43 +123,6 @@ namespace RentMaster.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_landlord", x => x.Uid);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "apartment_rooms",
-                columns: table => new
-                {
-                    Uid = table.Column<Guid>(type: "uuid", nullable: false),
-                    ApartmentUid = table.Column<Guid>(type: "uuid", nullable: false),
-                    LandlordUid = table.Column<Guid>(type: "uuid", nullable: false),
-                    RoomNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Price = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
-                    AreaLength = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
-                    ProvinceDivisionUid = table.Column<Guid>(type: "uuid", nullable: true),
-                    WardDivisionUid = table.Column<Guid>(type: "uuid", nullable: true),
-                    MetaData = table.Column<string>(type: "varchar(4000)", maxLength: 4000, nullable: true),
-                    AreaWidth = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
-                    Status = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    Images = table.Column<List<string>>(type: "text[]", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    IsDelete = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_apartment_rooms", x => x.Uid);
-                    table.ForeignKey(
-                        name: "FK_apartment_rooms_address_division_ProvinceDivisionUid",
-                        column: x => x.ProvinceDivisionUid,
-                        principalTable: "address_division",
-                        principalColumn: "Uid");
-                    table.ForeignKey(
-                        name: "FK_apartment_rooms_address_division_WardDivisionUid",
-                        column: x => x.WardDivisionUid,
-                        principalTable: "address_division",
-                        principalColumn: "Uid");
                 });
 
             migrationBuilder.CreateTable(
@@ -218,16 +206,6 @@ namespace RentMaster.Migrations
                         principalColumn: "Uid",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_apartment_rooms_ProvinceDivisionUid",
-                table: "apartment_rooms",
-                column: "ProvinceDivisionUid");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_apartment_rooms_WardDivisionUid",
-                table: "apartment_rooms",
-                column: "WardDivisionUid");
 
             migrationBuilder.CreateIndex(
                 name: "IX_apartments_ProvinceDivisionUid",

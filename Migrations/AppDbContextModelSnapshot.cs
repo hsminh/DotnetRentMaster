@@ -406,15 +406,12 @@ namespace RentMaster.Migrations
                     b.Property<Guid>("LandlordUid")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("MetaData")
-                        .HasMaxLength(4000)
-                        .HasColumnType("varchar(4000)");
+                    b.Property<Dictionary<string, string>>("MetaData")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
 
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid?>("ProvinceDivisionUid")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("RoomNumber")
                         .IsRequired()
@@ -429,14 +426,7 @@ namespace RentMaster.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("WardDivisionUid")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Uid");
-
-                    b.HasIndex("ProvinceDivisionUid");
-
-                    b.HasIndex("WardDivisionUid");
 
                     b.ToTable("apartment_rooms");
                 });
@@ -477,21 +467,6 @@ namespace RentMaster.Migrations
                     b.Navigation("ApartmentRoom");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("RentMaster.RealEstate.Models.ApartmentRoom", b =>
-                {
-                    b.HasOne("RentMaster.Addresses.Models.AddressDivision", "Province")
-                        .WithMany()
-                        .HasForeignKey("ProvinceDivisionUid");
-
-                    b.HasOne("RentMaster.Addresses.Models.AddressDivision", "Ward")
-                        .WithMany()
-                        .HasForeignKey("WardDivisionUid");
-
-                    b.Navigation("Province");
-
-                    b.Navigation("Ward");
                 });
 #pragma warning restore 612, 618
         }
