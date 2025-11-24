@@ -1,6 +1,6 @@
-namespace RentMaster.partner.Firebase.Configs;
+namespace RentMaster.partner.Firebase.Models;
 
-public class FirebaseConfig
+public class FirebaseServiceAccountConfig
 {
     public string Type { get; set; }
     public string ProjectId { get; set; }

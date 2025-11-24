@@ -16,6 +16,7 @@ using RentMaster.Core.Backend.Auth;
 using RentMaster.Management.RealEstate;
 using RentMaster.Management.RealEstate.Validators;
 using RentMaster.Management.Tenant;
+using RentMaster.partner.Firebase.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -86,6 +87,10 @@ builder.Services.AddCors(options =>
 // ------------------------------
 // Add JWT Authentication
 // ------------------------------
+// Register Firebase services
+builder.Services.AddSingleton<IUserChannelNotificationService, FirebasePubSubService>();
+builder.Services.AddLogging();
+
 builder.Services.AddAuthentication()
     .AddJwtBearer(options =>
     {

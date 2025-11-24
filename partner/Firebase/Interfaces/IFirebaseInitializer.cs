@@ -1,6 +1,6 @@
 namespace RentMaster.partner.Firebase.Interfaces;
 
-public class IFirebaseInitializer
+public interface IFirebaseInitializer
 {
-    
+    void Initialize();
 }
