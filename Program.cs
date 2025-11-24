@@ -11,6 +11,7 @@ using FluentValidation.AspNetCore;
 using Npgsql;
 using RentMaster.Addresses;
 using RentMaster.Addresses.Commands;
+using RentMaster.Ai;
 using RentMaster.Core.Backend.Auth;
 using RentMaster.Management.RealEstate;
 using RentMaster.Management.RealEstate.Validators;
@@ -63,6 +64,7 @@ builder.Services.AddAccountModule();
 builder.Services.AddAuthModule();
 builder.Services.RealEstateModule();
 builder.Services.AddTenantModule();
+builder.Services.AiModule();
 builder.Services.AddressModule();
 
 // Register repository
