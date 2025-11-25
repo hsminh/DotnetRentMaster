@@ -1,12 +1,8 @@
 using FirebaseAdmin.Messaging;
 using RentMaster.partner.Firebase.Services.Client;
+using RentMaster.partner.Firebase.Services.Interfaces;
 
 namespace RentMaster.partner.Firebase.Services;
-
-public interface IUserChannelNotificationService
-{
-    Task SendToUserChannelAsync(string channel, string message);
-}
 
 public class FirebasePubSubService : IUserChannelNotificationService
 {

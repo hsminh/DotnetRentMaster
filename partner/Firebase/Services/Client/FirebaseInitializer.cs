@@ -17,64 +17,47 @@ public static class FirebaseClientConfig
 
             try
             {
-                // Kiểm tra các biến môi trường cần thiết
-                var requiredVars = new[]
-                {
-                    "GCP_PROJECT_ID", "GCP_PRIVATE_KEY", "GCP_CLIENT_EMAIL",
-                    "GCP_PRIVATE_KEY_ID", "GCP_CLIENT_ID", "GCP_CLIENT_X509_CERT_URL"
-                };
+                var projectId     = Environment.GetEnvironmentVariable("GCP_PROJECT_ID");
+                var privateKeyId  = Environment.GetEnvironmentVariable("GCP_PRIVATE_KEY_ID");
+                var privateKeyRaw = Environment.GetEnvironmentVariable("GCP_PRIVATE_KEY");
+                var clientEmail   = Environment.GetEnvironmentVariable("GCP_CLIENT_EMAIL");
+                var clientId      = Environment.GetEnvironmentVariable("GCP_CLIENT_ID");
+                var clientX509Url = Environment.GetEnvironmentVariable("GCP_CLIENT_X509_CERT_URL");
 
-                foreach (var varName in requiredVars)
-                {
-                    if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(varName)))
-                    {
-                        throw new ArgumentException($"Missing required environment variable: {varName}");
-                    }
-                }
+                if (string.IsNullOrWhiteSpace(privateKeyRaw))
+                    throw new ArgumentException("GCP_PRIVATE_KEY missing");
 
-                var privateKey = Environment.GetEnvironmentVariable("GCP_PRIVATE_KEY") ?? "";
-                
-                // Xử lý private key đúng cách
-                privateKey = privateKey.Trim().Trim('"').Replace("\\n", "\n");
-                
-                // Kiểm tra định dạng private key
-                if (!privateKey.Contains("BEGIN PRIVATE KEY"))
-                {
-                    throw new ArgumentException("Invalid private key format");
-                }
+                var privateKey = privateKeyRaw.Trim().Trim('"').Replace("\\n", "\n");
 
                 var firebaseDict = new Dictionary<string, object?>
                 {
                     { "type", "service_account" },
-                    { "project_id", Environment.GetEnvironmentVariable("GCP_PROJECT_ID") },
-                    { "private_key_id", Environment.GetEnvironmentVariable("GCP_PRIVATE_KEY_ID") },
+                    { "project_id", projectId },
+                    { "private_key_id", privateKeyId },
                     { "private_key", privateKey },
-                    { "client_email", Environment.GetEnvironmentVariable("GCP_CLIENT_EMAIL") },
-                    { "client_id", Environment.GetEnvironmentVariable("GCP_CLIENT_ID") },
+                    { "client_email", clientEmail },
+                    { "client_id", clientId },
                     { "auth_uri", "https://accounts.google.com/o/oauth2/auth" },
                     { "token_uri", "https://oauth2.googleapis.com/token" },
                     { "auth_provider_x509_cert_url", "https://www.googleapis.com/oauth2/v1/certs" },
-                    { "client_x509_cert_url", Environment.GetEnvironmentVariable("GCP_CLIENT_X509_CERT_URL") }
+                    { "client_x509_cert_url", clientX509Url },
+                    { "universe_domain", "googleapis.com" }
                 };
 
                 var json = JsonSerializer.Serialize(firebaseDict);
-                logger?.LogInformation("Firebase credentials configured for project: {ProjectId}", 
-                    Environment.GetEnvironmentVariable("GCP_PROJECT_ID"));
-
                 var credential = GoogleCredential.FromJson(json);
 
-                // Tạo FirebaseApp với options
                 if (FirebaseApp.DefaultInstance == null)
                 {
                     FirebaseApp.Create(new AppOptions
                     {
                         Credential = credential,
-                        ProjectId = Environment.GetEnvironmentVariable("GCP_PROJECT_ID")
+                        ProjectId = projectId
                     });
                 }
 
                 _initialized = true;
-                logger?.LogInformation("Firebase initialized successfully.");
+                logger?.LogInformation("Firebase initialized successfully (env-based).");
             }
             catch (Exception ex)
             {

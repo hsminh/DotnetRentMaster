@@ -17,6 +17,8 @@ using RentMaster.Management.RealEstate;
 using RentMaster.Management.RealEstate.Validators;
 using RentMaster.Management.Tenant;
 using RentMaster.partner.Firebase.Services;
+using RentMaster.partner.Firebase.Services.Client;
+using IUserChannelNotificationService = RentMaster.partner.Firebase.Services.Interfaces.IUserChannelNotificationService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,7 +90,17 @@ builder.Services.AddCors(options =>
 // Add JWT Authentication
 // ------------------------------
 // Register Firebase services
-builder.Services.AddSingleton<IUserChannelNotificationService, FirebasePubSubService>();
+var loggerFactory = LoggerFactory.Create(logging =>
+{
+    logging.AddConsole();
+});
+var logger = loggerFactory.CreateLogger("FirebaseInit");
+
+// Khởi tạo Firebase
+FirebaseClientConfig.Init(logger);
+// HttpClient cho FirebaseRealtimeService
+builder.Services.AddHttpClient<IUserChannelNotificationService, FirebaseRealtimeService>();
+
 builder.Services.AddLogging();
 
 builder.Services.AddAuthentication()
