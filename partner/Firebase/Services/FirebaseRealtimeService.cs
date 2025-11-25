@@ -1,3 +1,6 @@
+using System.Net.Http.Json;
+using Microsoft.Extensions.Logging;
+using RentMaster.partner.Firebase.Models;
 using RentMaster.partner.Firebase.Services.Interfaces;
 
 namespace RentMaster.partner.Firebase.Services;
@@ -19,23 +22,18 @@ public class FirebaseRealtimeService : IUserChannelNotificationService
         _httpClient.BaseAddress = new Uri(_databaseUrl);
     }
 
-    public async Task SendToUserChannelAsync(string channel, string message)
+    public async Task SendToUserChannelAsync(string channel, ChatMessage message)
     {
-        if (string.IsNullOrWhiteSpace(channel)) throw new ArgumentException("Channel cannot be empty", nameof(channel));
-        if (string.IsNullOrWhiteSpace(message)) throw new ArgumentException("Message cannot be empty", nameof(message));
-
-        var payload = new
-        {
-            channel,
-            message,
-            created_at = DateTime.UtcNow.ToString("O")
-        };
+        if (string.IsNullOrWhiteSpace(channel)) 
+            throw new ArgumentException("Channel cannot be empty", nameof(channel));
+        if (message == null) 
+            throw new ArgumentNullException(nameof(message));
 
         try
         {
             _logger.LogInformation("Posting to Realtime DB: {Url}", channel);
 
-            var response = await _httpClient.PostAsJsonAsync($"{channel}.json", payload);
+            var response = await _httpClient.PostAsJsonAsync($"{channel}.json", message);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -52,5 +50,18 @@ public class FirebaseRealtimeService : IUserChannelNotificationService
             _logger.LogError(ex, "Error calling Realtime DB for channel '{Channel}'", channel);
             throw;
         }
+    }
+
+    public async Task SendToUserChannelAsync(string channel, string message)
+    {
+        var chatMessage = new ChatMessage
+        {
+            Content = message,
+            Sender = "system",
+            SenderId = "system",
+            Timestamp = DateTime.UtcNow.ToString("O")
+        };
+
+        await SendToUserChannelAsync(channel, chatMessage);
     }
 }

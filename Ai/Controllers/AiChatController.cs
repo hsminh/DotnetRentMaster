@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RentMaster.Accounts.Models;
 using RentMaster.Ai.Interfaces;
+using RentMaster.partner.Firebase.Models;
 using RentMaster.partner.Firebase.Services.Interfaces;
 using RentMaster.Core.Middleware;
 
@@ -8,7 +9,7 @@ namespace RentMaster.Ai.Controllers;
 
 [ApiController]
 [Route("consumer/api/chat-bot")]
-[Attributes.UserScope] 
+// [Attributes.UserScope] 
 public class AiChatController : ControllerBase
 {
     private readonly IGoogleAiService _aiService;
@@ -30,24 +31,37 @@ public class AiChatController : ControllerBase
     {
         try
         {
-            var user = HttpContext.GetCurrentUser<Consumer>();
-        
-            if (user == null)
+            // var user = HttpContext.GetCurrentUser<Consumer>();
+            //
+            // if (user == null)
+            // {
+            //     return Unauthorized(new { message = "User not found" });
+            // }
+            //
+            // var consumerId = user.Uid.ToString();
+            var channel = $"chatbot-ai-3a6560b3-6149-480d-a13b-d3b6d2de0f12-chatbot";
+            // Send user message
+            var userMessage = new ChatMessage
             {
-                return Unauthorized(new { message = "User not found" });
-            }
-
-            var consumerId = user.Uid.ToString();
-            var channel = $"chatbot-ai-{consumerId}-chatbot";
-            var timestamp = DateTime.Now.ToString("HH:mm dd/MM/yyyy");
-        
-            await _firebaseService.SendToUserChannelAsync(channel, $"[{timestamp}] User: {request.Question}");
+                Content = request.Question,
+                Sender = "user",
+                SenderId = "3a6560b3-6149-480d-a13b-d3b6d2de0f12",
+                Timestamp = DateTime.UtcNow.ToString("O")
+            };
+            
+            await _firebaseService.SendToUserChannelAsync(channel, userMessage);
         
             var aiResponse = await _aiService.AskAsync(request.Question);
         
-            timestamp = DateTime.Now.ToString("HH:mm dd/MM/yyyy");
-        
-            await _firebaseService.SendToUserChannelAsync(channel, $"[{timestamp}] AI: {aiResponse}");
+            var aiMessage = new ChatMessage
+            {
+                Content = aiResponse,
+                Sender = "ai",
+                SenderId = "system",
+                Timestamp = DateTime.UtcNow.ToString("O")
+            };
+            
+            await _firebaseService.SendToUserChannelAsync(channel, aiMessage);
 
             return Ok(new 
             { 
