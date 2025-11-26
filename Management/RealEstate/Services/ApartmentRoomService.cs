@@ -1,7 +1,9 @@
+using Microsoft.EntityFrameworkCore;
 using RentMaster.Accounts.LandLords.Models;
 using RentMaster.Core.File;
 using RentMaster.Core.Services;
 using RentMaster.Core.types.enums;
+using RentMaster.Data;
 using RentMaster.Management.RealEstate.Models;
 using RentMaster.Management.RealEstate.Repositories;
 using RentMaster.Management.RealEstate.Types.Request;
@@ -12,12 +14,14 @@ namespace RentMaster.Management.RealEstate.Services
     {
         private readonly ApartmentRoomRepository _apartmentRoomRepository;
         private readonly FileService _fileService;
+        private readonly AppDbContext _context;
 
-        public ApartmentRoomService(ApartmentRoomRepository apartmentRoomRepository, FileService fileService)
+        public ApartmentRoomService(ApartmentRoomRepository apartmentRoomRepository, FileService fileService, AppDbContext context)
             : base(apartmentRoomRepository)
         {
             _apartmentRoomRepository = apartmentRoomRepository;
             _fileService = fileService;
+            _context = context;
         }
 
         public async Task<IEnumerable<ApartmentRoom>> GetApartmentRooms(LandLord landlord)
@@ -66,10 +70,68 @@ namespace RentMaster.Management.RealEstate.Services
             await _apartmentRoomRepository.UpdateAsync(room);
             return room;
         }
-        public async Task<IEnumerable<ApartmentRoom>> GetAllRooms()
+        
+    public async Task<IEnumerable<ApartmentRoom>> GetAllRooms(RoomFilterRequest? filter = null)
+{
+    var apartmentQuery = _context.Apartments.Where(a => !a.IsDelete);
+
+    if (filter != null)
+    {
+        if (filter.ProvinceDivisionUid.HasValue)
+            apartmentQuery = apartmentQuery.Where(a => a.ProvinceDivisionUid == filter.ProvinceDivisionUid.Value);
+
+        if (filter.WardDivisionUid.HasValue)
+            apartmentQuery = apartmentQuery.Where(a => a.WardDivisionUid == filter.WardDivisionUid.Value);
+
+        if (!string.IsNullOrEmpty(filter.ProvinceName))
         {
-            return await _apartmentRoomRepository.FilterAsync(a => !a.IsDelete);
+            apartmentQuery = from apartment in apartmentQuery
+                            join province in _context.AddressDivisions 
+                                on apartment.ProvinceDivisionUid equals province.Uid
+                            where province.Name.Contains(filter.ProvinceName)
+                            select apartment;
         }
+
+        if (!string.IsNullOrEmpty(filter.AddressDetail))
+        {
+            apartmentQuery = apartmentQuery.Where(a => 
+                a.MetaData != null && 
+                a.MetaData.Contains(filter.AddressDetail)
+            );
+        }
+    }
+
+    var filteredApartments = await apartmentQuery.ToListAsync();
+    var apartmentUids = filteredApartments.Select(a => a.Uid).ToList();
+
+    if (!apartmentUids.Any())
+        return new List<ApartmentRoom>();
+
+    var roomQuery = _context.ApartmentRooms
+        .Where(r => !r.IsDelete && apartmentUids.Contains(r.ApartmentUid));
+
+    if (filter != null)
+    {
+        if (filter.MinPrice.HasValue)
+            roomQuery = roomQuery.Where(r => r.Price >= filter.MinPrice.Value);
+
+        if (filter.MaxPrice.HasValue)
+            roomQuery = roomQuery.Where(r => r.Price <= filter.MaxPrice.Value);
+
+        if (filter.ApartmentUid.HasValue)
+            roomQuery = roomQuery.Where(r => r.ApartmentUid == filter.ApartmentUid.Value);
+    }
+
+    var rooms = await roomQuery.ToListAsync();
+
+    var roomWithApartmentInfo = rooms.Select(room => 
+    {
+        return room;
+    }).ToList();
+
+    return roomWithApartmentInfo;
+}
+
     }
     
 }

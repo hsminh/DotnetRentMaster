@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RentMaster.Management.RealEstate.Services;
-using RentMaster.Management.RealEstate.Models;
-using RentMaster.Management.RealEstate.Types.Response;
+using RentMaster.Management.RealEstate.Types.Request;
 
 namespace RentMaster.Management.RealEstate.Controllers.PublicController
 {
@@ -12,7 +11,6 @@ namespace RentMaster.Management.RealEstate.Controllers.PublicController
         private readonly ApartmentService _service;
         private readonly ApartmentRoomService _apartmentRoomService;
 
-
         public PublicApartmentController(ApartmentService service, ApartmentRoomService apartmentRoomService)
         {
             _service = service;
@@ -20,15 +18,17 @@ namespace RentMaster.Management.RealEstate.Controllers.PublicController
         }
 
         [HttpGet("apartments")]
-        public async Task<IActionResult> GetFullApartments()
+        public async Task<IActionResult> GetFullApartments([FromQuery] ApartmentFilterRequest filter)
         {
-            var apartments = await _service.GetFullApartments();
+            var apartments = await _service.GetFullApartments(filter);
             return Ok(apartments);
         }
+
         [HttpGet("apartment-rooms")]
-        public async Task<IEnumerable<ApartmentRoom>> GetAllRooms()
+        public async Task<IActionResult> GetAllRooms([FromQuery] RoomFilterRequest filter)
         {
-            return await _apartmentRoomService.GetAllRooms();
+            var rooms = await _apartmentRoomService.GetAllRooms(filter);
+            return Ok(rooms);
         }
     }
 }

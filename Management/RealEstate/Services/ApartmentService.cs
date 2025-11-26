@@ -80,40 +80,63 @@ public class ApartmentService : BaseService<Apartment>
         var apartment = new Apartment(request, landLord.Uid, imageUrls);
         return await _apartmentRepository.CreateAsync(apartment);
     }
-    public async Task<IEnumerable<ApartmentResponse>> GetFullApartments()
+public async Task<IEnumerable<ApartmentResponse>> GetFullApartments(ApartmentFilterRequest? filter = null)
+{
+    var apartments = await _apartmentRepository.FilterAsync(a => 
+        !a.IsDelete && a.Type == ApartmentType.FullApartment.ToString());
+
+    if (filter != null)
     {
-        var apartments = await _apartmentRepository.FilterAsync(
-            a => !a.IsDelete && a.Type == ApartmentType.FullApartment.ToString());
-        
-        // Get all unique province and ward IDs
-        var provinceIds = apartments.Select(a => a.ProvinceDivisionUid).Where(id => id.HasValue).Cast<Guid>().ToList();
-        var wardIds = apartments.Select(a => a.WardDivisionUid).Where(id => id.HasValue).Cast<Guid>().ToList();
-        
-        // Load all related entities in one query each
-        var provinces = await _context.AddressDivisions
-            .Where(a => provinceIds.Contains(a.Uid))
-            .ToDictionaryAsync(a => a.Uid);
-            
-        var wards = await _context.AddressDivisions
-            .Where(a => wardIds.Contains(a.Uid))
-            .ToDictionaryAsync(a => a.Uid);
-        
-        // Assign related entities
-        foreach (var apartment in apartments)
-        {
-            if (apartment.ProvinceDivisionUid.HasValue && 
-                provinces.TryGetValue(apartment.ProvinceDivisionUid.Value, out var province))
-            {
-                apartment.Province = province;
-            }
-            
-            if (apartment.WardDivisionUid.HasValue && 
-                wards.TryGetValue(apartment.WardDivisionUid.Value, out var ward))
-            {
-                apartment.Ward = ward;
-            }
-        }
-            
-        return apartments.Select(ApartmentResponse.FromApartment);
+        if (filter.MinPrice.HasValue)
+            apartments = apartments.Where(a => a.Price >= filter.MinPrice.Value).ToList();
+
+        if (filter.MaxPrice.HasValue)
+            apartments = apartments.Where(a => a.Price <= filter.MaxPrice.Value).ToList();
+
+        if (filter.WardDivisionUid.HasValue)
+            apartments = apartments.Where(a => a.WardDivisionUid == filter.WardDivisionUid.Value).ToList();
+
+        if (filter.ProvinceDivisionUid.HasValue)
+            apartments = apartments.Where(a => a.ProvinceDivisionUid == filter.ProvinceDivisionUid.Value).ToList();
     }
+
+    var provinceIds = apartments.Select(a => a.ProvinceDivisionUid).Where(id => id.HasValue).Cast<Guid>().ToList();
+    var wardIds = apartments.Select(a => a.WardDivisionUid).Where(id => id.HasValue).Cast<Guid>().ToList();
+    
+    // Load all related entities in one query each
+    var provinces = await _context.AddressDivisions
+        .Where(a => provinceIds.Contains(a.Uid))
+        .ToDictionaryAsync(a => a.Uid);
+        
+    var wards = await _context.AddressDivisions
+        .Where(a => wardIds.Contains(a.Uid))
+        .ToDictionaryAsync(a => a.Uid);
+    
+    // Assign related entities
+    foreach (var apartment in apartments)
+    {
+        if (apartment.ProvinceDivisionUid.HasValue && 
+            provinces.TryGetValue(apartment.ProvinceDivisionUid.Value, out var province))
+        {
+            apartment.Province = province;
+        }
+        
+        if (apartment.WardDivisionUid.HasValue && 
+            wards.TryGetValue(apartment.WardDivisionUid.Value, out var ward))
+        {
+            apartment.Ward = ward;
+        }
+    }
+
+    // Apply province name filter after loading related data
+    if (filter != null && !string.IsNullOrEmpty(filter.ProvinceName))
+    {
+        apartments = apartments.Where(a => 
+            a.Province != null && 
+            a.Province.Name.Contains(filter.ProvinceName, StringComparison.OrdinalIgnoreCase)
+        ).ToList();
+    }
+        
+    return apartments.Select(ApartmentResponse.FromApartment);
+}
 }
