@@ -1,3 +1,4 @@
+using RentMaster.Addresses.Commands;
 using RentMaster.Addresses.Repostiories;
 using RentMaster.Addresses.Services;
 
@@ -9,6 +10,8 @@ namespace RentMaster.Addresses
         {
             services.AddScoped<AddressService>();
             services.AddScoped<AddressDivisionRepository>();
+            services.AddScoped<IAddressImportService, AddressImportService>();
+            services.AddTransient<AddressDataSeeder>();
             return services;
         }
     }

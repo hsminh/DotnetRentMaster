@@ -24,5 +24,6 @@ namespace RentMaster.Addresses.Models
         public const string Province = "province";
         public const string Ward = "ward";
         public const string Country = "country";
+        public const string Street = "street";
     }
 }

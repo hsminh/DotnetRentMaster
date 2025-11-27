@@ -32,6 +32,8 @@ namespace RentMaster.Management.RealEstate.Types.Request
         public Guid WardDivisionUid { get; set; }
 
         public string? MetaData { get; set; }
+        
+        public Guid? StreetUid { get; set; }
 
         public List<IFormFile>? Files { get; set; } = new List<IFormFile>();
     }

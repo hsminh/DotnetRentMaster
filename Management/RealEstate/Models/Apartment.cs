@@ -58,6 +58,11 @@ public class Apartment : BaseModel
 
     [ForeignKey(nameof(WardDivisionUid))]
     public AddressDivision? Ward { get; set; }
+    
+    public Guid? StreetUid { get; set; }
+    
+    [ForeignKey(nameof(StreetUid))]
+    public AddressDivision? Street { get; set; }
     public Apartment() {}
 
     public Apartment(ApartmentCreateRequest request, Guid landlordUid, List<string> imageUrls)
@@ -69,6 +74,7 @@ public class Apartment : BaseModel
 
         ProvinceDivisionUid = request.ProvinceDivisionUid;
         WardDivisionUid     = request.WardDivisionUid;
+        StreetUid           = request.StreetUid;
         MetaData            = request.MetaData;
 
         AreaLength = request.AreaLength;

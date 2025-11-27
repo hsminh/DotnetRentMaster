@@ -47,6 +47,11 @@ namespace RentMaster.Management.RealEstate.Validators
                 .NotEmpty().WithMessage("Ward is required.")
                 .Must(WardExists).WithMessage("Invalid ward ID or ward does not belong to the specified province.");
 
+            // Ward validation
+            RuleFor(x => x.StreetUid)
+                .NotEmpty().WithMessage("Street is required.")
+                .Must(StreetExists).WithMessage("Invalid street ID or ward does not belong to the specified province.");
+
             // MetaData
             RuleFor(x => x.MetaData)
                 .NotEmpty().WithMessage("MetaData is required.")
@@ -72,9 +77,17 @@ namespace RentMaster.Management.RealEstate.Validators
         // Ward synchronous check
         private bool WardExists(Guid wardUid)
         {
-            var provinces = _addressRepository.Filter(d => d.Type == "ward");
-            return provinces.Any(p => p.Uid == wardUid);
+            var ward = _addressRepository.Filter(d => d.Type == "ward");
+            return ward.Any(p => p.Uid == wardUid);
         }
+        // Street synchronous check
+        private bool StreetExists(Guid? streetUid)
+        {
+            if (!streetUid.HasValue) return false;
+            var street = _addressRepository.Filter(d => d.Type == "street");
+            return street.Any(p => p.Uid == streetUid.Value);
+        }
+
 
     }
 }

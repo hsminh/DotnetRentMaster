@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using RentMaster.Accounts.LandLords.Models;
-using RentMaster.Addresses.Models;
 using RentMaster.Core.File;
 using RentMaster.Core.Services;
 using RentMaster.Core.types.enums;
@@ -80,63 +79,48 @@ public class ApartmentService : BaseService<Apartment>
         var apartment = new Apartment(request, landLord.Uid, imageUrls);
         return await _apartmentRepository.CreateAsync(apartment);
     }
-public async Task<IEnumerable<ApartmentResponse>> GetFullApartments(ApartmentFilterRequest? filter = null)
-{
-    var apartments = await _apartmentRepository.FilterAsync(a => 
-        !a.IsDelete && a.Type == ApartmentType.FullApartment.ToString());
 
-    if (filter != null)
+    public async Task<IEnumerable<ApartmentResponse>> GetFullApartments(ApartmentFilterRequest? filter = null)
     {
-        if (filter.MinPrice.HasValue)
-            apartments = apartments.Where(a => a.Price >= filter.MinPrice.Value).ToList();
+        var query = _context.Apartments
+            .Where(a => !a.IsDelete && a.Type == ApartmentType.FullApartment.ToString())
+            .AsQueryable();
 
-        if (filter.MaxPrice.HasValue)
-            apartments = apartments.Where(a => a.Price <= filter.MaxPrice.Value).ToList();
-
-        if (filter.WardDivisionUid.HasValue)
-            apartments = apartments.Where(a => a.WardDivisionUid == filter.WardDivisionUid.Value).ToList();
-
-        if (filter.ProvinceDivisionUid.HasValue)
-            apartments = apartments.Where(a => a.ProvinceDivisionUid == filter.ProvinceDivisionUid.Value).ToList();
-    }
-
-    var provinceIds = apartments.Select(a => a.ProvinceDivisionUid).Where(id => id.HasValue).Cast<Guid>().ToList();
-    var wardIds = apartments.Select(a => a.WardDivisionUid).Where(id => id.HasValue).Cast<Guid>().ToList();
-    
-    // Load all related entities in one query each
-    var provinces = await _context.AddressDivisions
-        .Where(a => provinceIds.Contains(a.Uid))
-        .ToDictionaryAsync(a => a.Uid);
-        
-    var wards = await _context.AddressDivisions
-        .Where(a => wardIds.Contains(a.Uid))
-        .ToDictionaryAsync(a => a.Uid);
-    
-    // Assign related entities
-    foreach (var apartment in apartments)
-    {
-        if (apartment.ProvinceDivisionUid.HasValue && 
-            provinces.TryGetValue(apartment.ProvinceDivisionUid.Value, out var province))
+        // Apply filters
+        if (filter != null)
         {
-            apartment.Province = province;
+            if (filter.MinPrice.HasValue)
+                query = query.Where(a => a.Price >= filter.MinPrice.Value);
+
+            if (filter.MaxPrice.HasValue)
+                query = query.Where(a => a.Price <= filter.MaxPrice.Value);
+
+            if (filter.WardDivisionUid.HasValue)
+                query = query.Where(a => a.WardDivisionUid == filter.WardDivisionUid.Value);
+
+            if (filter.ProvinceDivisionUid.HasValue)
+                query = query.Where(a => a.ProvinceDivisionUid == filter.ProvinceDivisionUid.Value);
+                
+            if (filter.StreetUid.HasValue)
+                query = query.Where(a => a.StreetUid == filter.StreetUid.Value);
+        }
+
+        // Get all apartments with related data
+        var apartments = await query
+            .Include(a => a.Province)
+            .Include(a => a.Ward)
+            .Include(a => a.Street)
+            .ToListAsync();
+
+        // Apply any remaining filters that need in-memory processing
+        if (filter != null && !string.IsNullOrEmpty(filter.ProvinceName))
+        {
+            apartments = apartments.Where(a => 
+                a.Province != null && 
+                a.Province.Name.Contains(filter.ProvinceName, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
         }
         
-        if (apartment.WardDivisionUid.HasValue && 
-            wards.TryGetValue(apartment.WardDivisionUid.Value, out var ward))
-        {
-            apartment.Ward = ward;
-        }
+        return apartments.Select(ApartmentResponse.FromApartment);
     }
-
-    // Apply province name filter after loading related data
-    if (filter != null && !string.IsNullOrEmpty(filter.ProvinceName))
-    {
-        apartments = apartments.Where(a => 
-            a.Province != null && 
-            a.Province.Name.Contains(filter.ProvinceName, StringComparison.OrdinalIgnoreCase)
-        ).ToList();
-    }
-        
-    return apartments.Select(ApartmentResponse.FromApartment);
-}
 }
