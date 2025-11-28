@@ -13,7 +13,7 @@ using RentMaster.Data;
 namespace RentMaster.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251127092525_AddAddressDivision")]
+    [Migration("20251127095605_AddAddressDivision")]
     partial class AddAddressDivision
     {
         /// <inheritdoc />
@@ -281,6 +281,9 @@ namespace RentMaster.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(50)");
 
+                    b.Property<Guid?>("StreetUid")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -302,6 +305,8 @@ namespace RentMaster.Migrations
                     b.HasKey("Uid");
 
                     b.HasIndex("ProvinceDivisionUid");
+
+                    b.HasIndex("StreetUid");
 
                     b.HasIndex("WardDivisionUid");
 
@@ -440,11 +445,17 @@ namespace RentMaster.Migrations
                         .WithMany()
                         .HasForeignKey("ProvinceDivisionUid");
 
+                    b.HasOne("RentMaster.Addresses.Models.AddressDivision", "Street")
+                        .WithMany()
+                        .HasForeignKey("StreetUid");
+
                     b.HasOne("RentMaster.Addresses.Models.AddressDivision", "Ward")
                         .WithMany()
                         .HasForeignKey("WardDivisionUid");
 
                     b.Navigation("Province");
+
+                    b.Navigation("Street");
 
                     b.Navigation("Ward");
                 });

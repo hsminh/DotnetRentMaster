@@ -140,6 +140,7 @@ namespace RentMaster.Migrations
                     AreaWidth = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
                     ProvinceDivisionUid = table.Column<Guid>(type: "uuid", nullable: true),
                     WardDivisionUid = table.Column<Guid>(type: "uuid", nullable: true),
+                    StreetUid = table.Column<Guid>(type: "uuid", nullable: true),
                     MetaData = table.Column<string>(type: "varchar(4000)", maxLength: 4000, nullable: true),
                     TotalFloors = table.Column<int>(type: "integer", nullable: true),
                     Type = table.Column<string>(type: "varchar(50)", nullable: false),
@@ -156,6 +157,11 @@ namespace RentMaster.Migrations
                     table.ForeignKey(
                         name: "FK_apartments_address_division_ProvinceDivisionUid",
                         column: x => x.ProvinceDivisionUid,
+                        principalTable: "address_division",
+                        principalColumn: "Uid");
+                    table.ForeignKey(
+                        name: "FK_apartments_address_division_StreetUid",
+                        column: x => x.StreetUid,
                         principalTable: "address_division",
                         principalColumn: "Uid");
                     table.ForeignKey(
@@ -211,6 +217,11 @@ namespace RentMaster.Migrations
                 name: "IX_apartments_ProvinceDivisionUid",
                 table: "apartments",
                 column: "ProvinceDivisionUid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_apartments_StreetUid",
+                table: "apartments",
+                column: "StreetUid");
 
             migrationBuilder.CreateIndex(
                 name: "IX_apartments_WardDivisionUid",

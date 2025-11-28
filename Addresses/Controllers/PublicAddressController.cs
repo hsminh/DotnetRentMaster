@@ -1,50 +1,32 @@
 using Microsoft.AspNetCore.Mvc;
-using RentMaster.Addresses.Models;
 using RentMaster.Addresses.Services;
+namespace RentMaster.Addresses.Controllers;
 
-namespace RentMaster.Addresses.Controllers
+[ApiController]
+[Route("public/address")]
+public class PublicAddressController : ControllerBase
 {
-    [ApiController]
-    [Route("public/address")]
-    public class PublicAddressController : ControllerBase
+    private readonly AddressService _service;
+
+    public PublicAddressController(AddressService service, ILogger<PublicAddressController> logger)
     {
-        private readonly AddressService _service;
-        private readonly ILogger<PublicAddressController> _logger;
+        _service = service;
+    }
 
-        public PublicAddressController(AddressService service, ILogger<PublicAddressController> logger)
-        {
-            _service = service;
-            _logger = logger;
-        }
+    [HttpGet("province")]
+    public async Task<IActionResult> GetProvinces()
+    {
+        var provinces = await _service.GetProvincesAsync();
+        return Ok(provinces);
+    }
 
-        [HttpGet("province")]
-        public async Task<IActionResult> GetProvinces()
-        {
-            try
-            {
-                var provinces = await _service.GetAddressAsync(DivisionType.Province);
-                return Ok(provinces);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting provinces");
-                return StatusCode(500, "An error occurred while getting provinces");
-            }
-        }
+    [HttpGet("division")]
+    public async Task<IActionResult> GetDivisions([FromQuery] string? parentUid)
+    {
+        if (string.IsNullOrWhiteSpace(parentUid))
+            return BadRequest("parentUid is required");
 
-        [HttpGet("ward")]
-        public async Task<IActionResult> GetWards([FromQuery] string? parentCode)
-        {
-            try
-            {
-                var wards = await _service.GetAddressAsync(DivisionType.Ward, parentCode);
-                return Ok(wards);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting wards for parent {ParentCode}", parentCode);
-                return StatusCode(500, "An error occurred while getting wards");
-            }
-        }
+        var divisions = await _service.GetChildrenByParentUidAsync(parentUid);
+        return Ok(divisions);
     }
 }

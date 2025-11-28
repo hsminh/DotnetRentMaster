@@ -20,6 +20,7 @@ public class ApartmentResponse
     public List<string> Images { get; set; } = new();
     public AddressDivision? Province { get; set; }
     public AddressDivision? Ward { get; set; }
+    public AddressDivision? Street { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public bool IsDelete { get; set; }
@@ -43,6 +44,7 @@ public class ApartmentResponse
             Images = apartment.Images,
             Province = apartment.Province,
             Ward = apartment.Ward,
+            Street = apartment.Street,
             CreatedAt = apartment.CreatedAt,
             UpdatedAt = apartment.UpdatedAt,
             IsDelete = apartment.IsDelete

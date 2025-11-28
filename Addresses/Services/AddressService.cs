@@ -1,28 +1,23 @@
 using RentMaster.Addresses.Models;
 using RentMaster.Addresses.Repostiories;
-using RentMaster.Core.Services;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+namespace RentMaster.Addresses.Services;
 
-namespace RentMaster.Addresses.Services
+public class AddressService
 {
-    public class AddressService : BaseService<AddressDivision>
+    private readonly AddressDivisionRepository _repo;
+
+    public AddressService(AddressDivisionRepository repo)
     {
-        private readonly AddressDivisionRepository _repository;
+        _repo = repo;
+    }
 
-        public AddressService(AddressDivisionRepository repository) 
-            : base(repository)
-        {
-            _repository = repository;
-        }
+    public async Task<IReadOnlyList<AddressDivision>> GetProvincesAsync()
+    {
+        return (await _repo.FilterAsync(d => d.Type == DivisionType.Province)).ToList();
+    }
 
-        public async Task<IEnumerable<AddressDivision>> GetAddressAsync(string type, string? parentCode = null)
-        {   
-            if (string.IsNullOrEmpty(parentCode))
-            {
-                return await _repository.FilterAsync(d => d.Type == type);
-            }
-            return await _repository.FilterAsync(d => d.Type == type && d.ParentId == parentCode);
-        }
+    public async Task<IReadOnlyList<AddressDivision>> GetChildrenByParentUidAsync(string parentUid)
+    {
+        return (await _repo.FilterAsync(d => d.ParentId == parentUid)).ToList();
     }
 }
