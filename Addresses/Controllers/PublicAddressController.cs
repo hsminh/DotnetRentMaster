@@ -46,5 +46,20 @@ namespace RentMaster.Addresses.Controllers
                 return StatusCode(500, "An error occurred while getting wards");
             }
         }
+        [HttpGet("street")]
+        public async Task<IActionResult> GetStreets([FromQuery] string? parentCode)
+        {
+            try
+            {
+                var streets = await _service.GetAddressAsync(DivisionType.Street, parentCode);
+                return Ok(streets);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting streets for parent {ParentCode}", parentCode);
+                return StatusCode(500, "An error occurred while getting streets");
+            }
+        }
+
     }
 }

@@ -24,5 +24,6 @@ namespace RentMaster.Addresses.Services
             }
             return await _repository.FilterAsync(d => d.Type == type && d.ParentId == parentCode);
         }
+       
     }
 }
