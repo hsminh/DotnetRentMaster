@@ -35,6 +35,9 @@ public class Apartment : BaseModel
     public Guid? ProvinceDivisionUid { get; set; }
 
     public Guid? WardDivisionUid { get; set; }
+    
+    public Guid? StreetUid { get; set; }
+    
 
     [MaxLength(4000)]
     [Column(TypeName = "varchar(4000)")]
@@ -58,8 +61,6 @@ public class Apartment : BaseModel
 
     [ForeignKey(nameof(WardDivisionUid))]
     public AddressDivision? Ward { get; set; }
-    
-    public Guid? StreetUid { get; set; }
     
     [ForeignKey(nameof(StreetUid))]
     public AddressDivision? Street { get; set; }
@@ -92,6 +93,7 @@ public class Apartment : BaseModel
 
         existing.ProvinceDivisionUid = request.ProvinceDivisionUid;
         existing.WardDivisionUid     = request.WardDivisionUid;
+        existing.StreetUid           = request.StreetUid;
         existing.MetaData            = request.MetaData;
 
         existing.AreaLength = request.AreaLength;
