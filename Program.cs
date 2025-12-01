@@ -19,6 +19,7 @@ using RentMaster.Management.RealEstate.Validators;
 using RentMaster.Management.Tenant;
 using RentMaster.partner.Firebase.Services;
 using RentMaster.partner.Firebase.Services.Client;
+// using Payments.VnPay;
 using IUserChannelNotificationService = RentMaster.partner.Firebase.Services.Interfaces.IUserChannelNotificationService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,6 +62,17 @@ builder.Services.AddControllers();
 builder.Services.AddValidatorsFromAssemblyContaining<ApartmentRoomValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<ApartmentValidator>();
 builder.Services.AddFluentValidationAutoValidation();
+// ------------------------------
+// Configure MoMo Payment
+// ------------------------------
+builder.Services.Configure<Payments.MoMo.Models.MoMoConfig>(builder.Configuration.GetSection("MoMo"));
+builder.Services.AddHttpClient<Payments.MoMo.Services.IMoMoPaymentService, Payments.MoMo.Services.MoMoPaymentService>();
+
+// ------------------------------
+// Configure VnPay Payment
+// ------------------------------
+// builder.Services.AddVnPayPaymentServices(builder.Configuration);
+
 // ------------------------------
 // Register custom modules
 // ------------------------------
