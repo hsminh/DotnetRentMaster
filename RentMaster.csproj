@@ -34,6 +34,7 @@
     <ItemGroup>
       <Folder Include="Accounts\Admin\" />
       <Folder Include="Accounts\Auth\" />
+      <Folder Include="Data\Repositories\" />
     </ItemGroup>
 
     <ItemGroup>

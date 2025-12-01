@@ -16,6 +16,7 @@ using RentMaster.Core.Backend.Auth;
 using RentMaster.Management.RealEstate;
 using RentMaster.Management.RealEstate.Validators;
 using RentMaster.Management.Tenant;
+using RentMaster.Management.ConsumerContact;
 using RentMaster.partner.Firebase.Services;
 using RentMaster.partner.Firebase.Services.Client;
 // using Payments.VnPay;
@@ -81,6 +82,7 @@ builder.Services.RealEstateModule();
 builder.Services.AddTenantModule();
 builder.Services.AiModule();
 builder.Services.AddressModule();
+builder.Services.AddConsumerContactModule();
 
 // Register repository
 

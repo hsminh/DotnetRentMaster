@@ -12,10 +12,10 @@ public class FirebaseTestController : ControllerBase
         _firebaseService = firebaseService;
     }
 
-    [HttpPost("firebase")]
-    public async Task<IActionResult> TestFirebase()
-    {
-        await _firebaseService.SendToUserChannelAsync("minhdz", "Hello from API via Realtime DB");
-        return Ok(new { status = "ok" });
-    }
+    // [HttpPost("firebase")]
+    // public async Task<IActionResult> TestFirebase()
+    // {
+    //     await _firebaseService.SendToChannelAsync("minhdz", "Hello from API via Realtime DB");
+    //     return Ok(new { status = "ok" });
+    // }
 }

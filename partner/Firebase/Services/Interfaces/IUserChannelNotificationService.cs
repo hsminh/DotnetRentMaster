@@ -4,8 +4,12 @@ namespace RentMaster.partner.Firebase.Services.Interfaces;
 
 public interface IUserChannelNotificationService
 {
-    Task SendToUserChannelAsync(string channel, ChatMessage message);
+    Task SendToChannelAsync(string channel, ChatMessage message);
+
+    Task<IEnumerable<ChatMessage>> GetChannelAsync(string channel);
+
+    Task UpdateChannelAsync(string channel, IEnumerable<ChatMessage> messages);
+
+    Task MarkAllAsReadAsync(string channel);
     
-    // Keep the old method for backward compatibility
-    Task SendToUserChannelAsync(string channel, string message);
 }

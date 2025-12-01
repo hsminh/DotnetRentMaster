@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RentMaster.Core.Backend.Auth.Interface;
 using RentMaster.Core.Backend.Auth.Types.enums;
+using RentMaster.Core.Backend.Auth.Types.Response;
 using RentMaster.Core.types.enums;
 
 namespace RentMaster.Core.Backend.Auth.service;
@@ -21,7 +22,7 @@ public class AuthService : IAuthService
             _configuration = configuration;
         }
 
-        public async Task<string?> LoginAsync(string gmail, string password, UserTypes type)
+        public async Task<LoginResponse?> LoginAsync(string gmail, string password, UserTypes type)
         {
             if (string.IsNullOrEmpty(gmail) || string.IsNullOrEmpty(password))
                 return null;
@@ -33,7 +34,21 @@ public class AuthService : IAuthService
             if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
                 return null;
 
-            return GenerateJwtToken(user, type);
+            var token = GenerateJwtToken(user, type);
+            
+            // Create a clean user object without sensitive data
+            var userResponse = new 
+            {
+                user.Uid,
+                user.FirstName,
+                user.LastName,
+                user.Gmail,
+                user.PhoneNumber,
+                user.CreatedAt,
+                user.UpdatedAt
+            };
+
+            return new LoginResponse(token, userResponse);
         }
 
         private string GenerateJwtToken(BaseAuth user, UserTypes type)
