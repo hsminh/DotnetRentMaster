@@ -16,8 +16,12 @@ public class AddressService
         return (await _repo.FilterAsync(d => d.Type == DivisionType.Province)).ToList();
     }
 
-    public async Task<IReadOnlyList<AddressDivision>> GetChildrenByParentUidAsync(string parentUid)
+    public async Task<IReadOnlyList<AddressDivision>> GetChildrenByParentUidAsync(string parentUid, string? type = null)
     {
-        return (await _repo.FilterAsync(d => d.ParentId == parentUid)).ToList();
+        var list = await _repo.FilterAsync(d =>
+            d.ParentId == parentUid &&
+            (type == null || d.Type.ToLower() == type.ToLower())
+        );
+        return list.ToList();
     }
 }
