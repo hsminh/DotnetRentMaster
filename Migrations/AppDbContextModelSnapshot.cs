@@ -29,6 +29,9 @@ namespace RentMaster.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Avatar")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -46,6 +49,9 @@ namespace RentMaster.Migrations
                     b.Property<bool>("IsDelete")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -55,10 +61,6 @@ namespace RentMaster.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Scope")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Status")
@@ -80,6 +82,9 @@ namespace RentMaster.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Avatar")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -97,6 +102,9 @@ namespace RentMaster.Migrations
                     b.Property<bool>("IsDelete")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -106,10 +114,6 @@ namespace RentMaster.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Scope")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Status")
@@ -131,6 +135,9 @@ namespace RentMaster.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Avatar")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -148,6 +155,9 @@ namespace RentMaster.Migrations
                     b.Property<bool>("IsDelete")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -157,10 +167,6 @@ namespace RentMaster.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Scope")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Status")

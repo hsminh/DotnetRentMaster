@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RentMaster.Core.Backend.Auth.Interface;
 using RentMaster.Core.Backend.Auth.Types.enums;
-using RentMaster.Core.Backend.Auth.Types.Response;
 using LoginRequest = RentMaster.Core.Backend.Auth.Types.Request.LoginRequest;
 
 namespace RentMaster.Controllers

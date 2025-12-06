@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RentMaster.Migrations
 {
     /// <inheritdoc />
-    public partial class AddAddressDivision : Migration
+    public partial class Updateschema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -44,12 +44,13 @@ namespace RentMaster.Migrations
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     IsDelete = table.Column<bool>(type: "boolean", nullable: false),
                     Gmail = table.Column<string>(type: "text", nullable: false),
-                    Scope = table.Column<string>(type: "text", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false),
                     FirstName = table.Column<string>(type: "text", nullable: false),
                     LastName = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "text", nullable: true)
+                    PhoneNumber = table.Column<string>(type: "text", nullable: true),
+                    Avatar = table.Column<string>(type: "text", nullable: true),
+                    IsVerified = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -91,12 +92,13 @@ namespace RentMaster.Migrations
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     IsDelete = table.Column<bool>(type: "boolean", nullable: false),
                     Gmail = table.Column<string>(type: "text", nullable: false),
-                    Scope = table.Column<string>(type: "text", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false),
                     FirstName = table.Column<string>(type: "text", nullable: false),
                     LastName = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "text", nullable: true)
+                    PhoneNumber = table.Column<string>(type: "text", nullable: true),
+                    Avatar = table.Column<string>(type: "text", nullable: true),
+                    IsVerified = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -113,16 +115,35 @@ namespace RentMaster.Migrations
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     IsDelete = table.Column<bool>(type: "boolean", nullable: false),
                     Gmail = table.Column<string>(type: "text", nullable: false),
-                    Scope = table.Column<string>(type: "text", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false),
                     FirstName = table.Column<string>(type: "text", nullable: false),
                     LastName = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "text", nullable: true)
+                    PhoneNumber = table.Column<string>(type: "text", nullable: true),
+                    Avatar = table.Column<string>(type: "text", nullable: true),
+                    IsVerified = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_landlord", x => x.Uid);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PaymentTransactions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrderId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    PartnerCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    Message = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    PayType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PaymentTransactions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -169,6 +190,35 @@ namespace RentMaster.Migrations
                         column: x => x.WardDivisionUid,
                         principalTable: "address_division",
                         principalColumn: "Uid");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ConsumerContacts",
+                columns: table => new
+                {
+                    Uid = table.Column<Guid>(type: "uuid", nullable: false),
+                    Consumer_Uid = table.Column<Guid>(type: "uuid", nullable: false),
+                    Landlord_Uid = table.Column<Guid>(type: "uuid", nullable: false),
+                    Apartment_UID = table.Column<Guid>(type: "uuid", nullable: false),
+                    Status = table.Column<string>(type: "varchar(20)", nullable: false),
+                    Type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ConsumerContacts", x => x.Uid);
+                    table.ForeignKey(
+                        name: "FK_ConsumerContacts_consumer_Consumer_Uid",
+                        column: x => x.Consumer_Uid,
+                        principalTable: "consumer",
+                        principalColumn: "Uid",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ConsumerContacts_landlord_Landlord_Uid",
+                        column: x => x.Landlord_Uid,
+                        principalTable: "landlord",
+                        principalColumn: "Uid",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -229,6 +279,16 @@ namespace RentMaster.Migrations
                 column: "WardDivisionUid");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ConsumerContacts_Consumer_Uid",
+                table: "ConsumerContacts",
+                column: "Consumer_Uid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ConsumerContacts_Landlord_Uid",
+                table: "ConsumerContacts",
+                column: "Landlord_Uid");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_tenants_ApartmentRoomUid",
                 table: "tenants",
                 column: "ApartmentRoomUid");
@@ -251,10 +311,16 @@ namespace RentMaster.Migrations
                 name: "admin");
 
             migrationBuilder.DropTable(
-                name: "landlord");
+                name: "ConsumerContacts");
+
+            migrationBuilder.DropTable(
+                name: "PaymentTransactions");
 
             migrationBuilder.DropTable(
                 name: "tenants");
+
+            migrationBuilder.DropTable(
+                name: "landlord");
 
             migrationBuilder.DropTable(
                 name: "apartment_rooms");
