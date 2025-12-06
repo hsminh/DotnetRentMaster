@@ -22,17 +22,4 @@ public class ConsumerContactRepository : BaseRepository<Models.ConsumerContact>
             cc.Apartment_UID == apartmentUid);
     }
 
-    public async Task<IEnumerable<Models.ConsumerContact>> GetByConsumerIdAsync(Guid consumerUid)
-    {
-        return await _dbSet
-            .Where(cc => cc.Consumer_Uid == consumerUid)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<Models.ConsumerContact>> GetByApartmentIdAsync(Guid apartmentUid, string type)
-    {
-        return await _dbSet
-            .Where(cc => cc.Apartment_UID == apartmentUid && cc.Type == type)
-            .ToListAsync();
-    }
 }

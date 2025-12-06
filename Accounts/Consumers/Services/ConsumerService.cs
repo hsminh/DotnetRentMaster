@@ -1,8 +1,12 @@
+using RentMaster.Accounts.Consumers.Types;
 using RentMaster.Accounts.Models;
 using RentMaster.Accounts.Repositories;
 using RentMaster.Accounts.Validator;
+using RentMaster.Controllers;
 using RentMaster.Core.Exceptions;
 using RentMaster.Core.Services;
+using RentMaster.Core.File;
+using RentMaster.Core.types.enums;
 
 namespace RentMaster.Accounts.Services
 {
@@ -10,12 +14,13 @@ namespace RentMaster.Accounts.Services
     {
         private readonly ConsumerValidator _validator;
         private readonly ConsumerRepository _consumerRepository;
-
-        public ConsumerService(ConsumerRepository repository, ConsumerValidator validator)
+        private readonly FileService _fileService;
+        public ConsumerService(ConsumerRepository repository, ConsumerValidator validator, FileService fileService)
             : base(repository)
         {
             _validator = validator;
             _consumerRepository = repository;
+            _fileService = fileService;
         }
 
         public override async Task<Consumer> CreateAsync(Consumer model)
@@ -31,25 +36,35 @@ namespace RentMaster.Accounts.Services
             return await base.CreateAsync(model);
         }
 
-        public override async Task UpdateAsync(Consumer model)
+        public async Task<Consumer> UpdateConsumerProfile(Guid uid, ConsumerRequest request)
         {
-            var existingConsumer = await _consumerRepository.FindByUidAsync(model.Uid);
+            var existingConsumer = await _consumerRepository.FindByUidAsync(uid);
             if (existingConsumer == null)
-                throw new ValidationException("user", "Not Found");
+                throw new KeyNotFoundException("Consumer not found");
 
-            model.Gmail = existingConsumer.Gmail;
-            model.Status = existingConsumer.Status;
-            model.IsVerified = existingConsumer.IsVerified;
-    
-            if (string.IsNullOrEmpty(model.Password) || model.Password == "************")
+            if (request.Avatar != null)
             {
-                model.Password = existingConsumer.Password;
+                var uploadResult = await _fileService.UploadFileAsync(
+                    request.Avatar,
+                    uid, 
+                    FileType.Image,
+                    FileScope.Public
+                );
+                existingConsumer.Avatar = uploadResult.Url;
+            }
+            existingConsumer.FirstName = request.FirstName;
+            existingConsumer.LastName = request.LastName;
+            existingConsumer.PhoneNumber = request.PhoneNumber;
+            if (string.IsNullOrEmpty(request.Password) || request.Password == "************")
+            {
+                existingConsumer.Password = existingConsumer.Password;
             }
             else
             {
-                model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+                existingConsumer.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
             }
-            await base.UpdateAsync(model);
+            await base.UpdateAsync(existingConsumer);
+            return existingConsumer;
         }
 
         public async Task<bool> CheckAndVerifyAsync(Consumer consumer)

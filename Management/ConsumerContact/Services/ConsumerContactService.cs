@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RentMaster.Accounts.LandLords.Models;
 using RentMaster.Core.Exceptions;
 using RentMaster.Core.Services;
 using RentMaster.Data;
@@ -25,7 +26,6 @@ public class ConsumerContactService : BaseService<Models.ConsumerContact>
         Guid apartmentUid
         )
     {
-        // Check if consumer already has an active contact for this apartment
         var hasActiveContact = await _repository.ConsumerHasActiveContact(
             consumerUid, apartmentUid);
 
@@ -34,7 +34,6 @@ public class ConsumerContactService : BaseService<Models.ConsumerContact>
             throw new ValidationException("Consumer", "Consumer already has an active contact for this apartment");
         }
 
-        // Get apartment to get the type
         var apartment = await _context.Apartments
             .FirstOrDefaultAsync(a => a.Uid == apartmentUid) 
             ?? throw new ValidationException("Apartment", "Apartment not found");
@@ -50,14 +49,61 @@ public class ConsumerContactService : BaseService<Models.ConsumerContact>
 
         return await _repository.CreateAsync(consumerContact);
     }
-
-    public async Task<IEnumerable<Models.ConsumerContact>> GetConsumerContacts(Guid consumerUid)
+    
+    public async Task<Models.ConsumerContact?> GetConsumerContactDetails(Guid contactId, Guid landlordId)
     {
-        return await _repository.GetByConsumerIdAsync(consumerUid);
+        var contact = await _context.ConsumerContacts
+            .Include(c => c.Consumer)
+            .FirstOrDefaultAsync(c => c.Uid == contactId && c.Landlord_Uid == landlordId);
+
+        if (contact == null)
+            return null;
+
+        if (contact.Type.Equals("FullApartment", StringComparison.OrdinalIgnoreCase))
+        {
+            contact.Apartment = await _context.Apartments
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Uid == contact.Apartment_UID);
+        }
+        else if (contact.Type.Equals("ApartmentRoom", StringComparison.OrdinalIgnoreCase))
+        {
+            contact.ApartmentRoom = await _context.ApartmentRooms
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ar => ar.Uid == contact.Apartment_UID);
+        }
+
+        return contact;
     }
 
-    public async Task<IEnumerable<Models.ConsumerContact>> GetApartmentContacts(Guid apartmentUid, string type)
+    public async Task<IEnumerable<Models.ConsumerContact>> GetConsumerContacts(LandLord landlord)
     {
-        return await _repository.GetByApartmentIdAsync(apartmentUid, type);
+        var query = _context.ConsumerContacts
+            .AsNoTracking()
+            .Where(c => c.Landlord_Uid == landlord.Uid);
+
+        var contacts = await query
+            .Include(c => c.Consumer)
+            .ToListAsync();
+
+    
+        foreach (var contact in contacts)
+        {
+            if (contact.Type.Equals("FullApartment", StringComparison.OrdinalIgnoreCase))
+            {
+                contact.Apartment = await _context.Apartments
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(a => a.Uid == contact.Apartment_UID);
+            }
+            else if (contact.Type.Equals("ApartmentRoom", StringComparison.OrdinalIgnoreCase))
+            {
+                contact.ApartmentRoom = await _context.ApartmentRooms
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(ar => ar.Uid == contact.Apartment_UID);
+            }
+        
+        }
+
+        return contacts;
     }
+
 }

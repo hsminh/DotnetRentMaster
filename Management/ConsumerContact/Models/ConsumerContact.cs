@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using RentMaster.Accounts.LandLords.Models;
 using RentMaster.Management.ConsumerContact.enums;
+using RentMaster.Management.RealEstate.Models;
 
 namespace RentMaster.Management.ConsumerContact.Models
 {
@@ -29,11 +30,16 @@ namespace RentMaster.Management.ConsumerContact.Models
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
-        // Navigation properties
         [ForeignKey("Consumer_Uid")]
         public virtual Accounts.Models.Consumer Consumer { get; set; }
         
         [ForeignKey("Landlord_Uid")]
         public virtual LandLord LandLord { get; set; }
+        
+        [NotMapped]
+        public virtual Apartment? Apartment { get; set; } 
+        
+        [NotMapped]
+        public virtual ApartmentRoom? ApartmentRoom { get; set; }
     }
 }

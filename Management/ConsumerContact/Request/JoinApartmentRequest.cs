@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace RentMaster.Management.ConsumerContact.Dtos
+namespace RentMaster.Management.ConsumerContact.Request
 {
     public class JoinApartmentRequest
     {

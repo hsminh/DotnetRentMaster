@@ -45,7 +45,8 @@ public class AuthService : IAuthService
                 user.Gmail,
                 user.PhoneNumber,
                 user.CreatedAt,
-                user.IsVerified
+                user.IsVerified,
+                user.Avatar
             };
 
             return new LoginResponse(token, userResponse);

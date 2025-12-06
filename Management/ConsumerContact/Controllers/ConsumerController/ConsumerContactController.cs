@@ -2,12 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using RentMaster.Core.Controllers;
 using RentMaster.Core.Exceptions;
 using RentMaster.Core.Middleware;
-using RentMaster.Management.ConsumerContact.Dtos;
 using RentMaster.Management.ConsumerContact.Services;
 using RentMaster.partner.Firebase.Services.Interfaces;
-using RentMaster.partner.Firebase.Models;
-using System;
-using System.Threading.Tasks;
+using RentMaster.Management.ConsumerContact.Request;
 
 namespace RentMaster.Management.ConsumerContact.Controllers
 {
@@ -67,28 +64,18 @@ namespace RentMaster.Management.ConsumerContact.Controllers
                     { "body", $"{user.FirstName} {user.LastName} has requested to join your apartment." }
                 };
                 
-                var nextDomainTemplate = _configuration["Frontend:NextDomain"];
-                if (string.IsNullOrEmpty(nextDomainTemplate))
-                {
-                    _logger.LogWarning("Frontend:NextDomain is not configured in appsettings.json");
-                    nextDomainTemplate = "http://localhost:3000/user/{0}";
-                }
-                var userDetailUrl = string.Format(nextDomainTemplate, user.Uid);
-
-                // Create chat message
                 var message = new ChatMessage
                 {
                     Content = $"{user.FirstName} {user.LastName} has requested to join your apartment.",
                     Sender = "system",
                     SenderId = user.Uid.ToString(),
-                    Link =  userDetailUrl,
+                    Link = $"http://localhost:3000/landlord/tenants/{contact.Uid}/edit",
                     Type = "JOIN_REQUEST",
                     IsRead = "False",
                     Data = notificationData,
                     Timestamp = DateTime.UtcNow.ToString("O")
                 };
 
-                // Send notification to landlord's channel
                 var channel = $"notification-landlord-{request.LandlordUid}";
                 try
                 {
@@ -115,7 +102,5 @@ namespace RentMaster.Management.ConsumerContact.Controllers
                 return StatusCode(500, new { message = "An error occurred while processing your request." });
             }
         }
-
-        // ... rest of the controller methods
     }
 }
