@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Http;
-using System;
-
 namespace RentMaster.Management.RealEstate.Types.Request
 {
     public class ApartmentCreateRequest

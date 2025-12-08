@@ -49,7 +49,7 @@ public class AiChatController : ControllerBase
                 Timestamp = DateTime.UtcNow.ToString("O")
             };
             
-            await _firebaseService.SendToUserChannelAsync(channel, userMessage);
+            await _firebaseService.SendToChannelAsync(channel, userMessage);
         
             var aiResponse = await _aiService.AskAsync(request.Question);
         
@@ -61,7 +61,7 @@ public class AiChatController : ControllerBase
                 Timestamp = DateTime.UtcNow.ToString("O")
             };
             
-            await _firebaseService.SendToUserChannelAsync(channel, aiMessage);
+            await _firebaseService.SendToChannelAsync(channel, aiMessage);
 
             return Ok(new 
             { 

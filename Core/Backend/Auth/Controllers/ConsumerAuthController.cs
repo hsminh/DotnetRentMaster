@@ -19,11 +19,11 @@ namespace RentMaster.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest model)
         {
-            var token = await _authService.LoginAsync(model.Gmail, model.Password, UserTypes.Consumer);
-            if (token == null)
+            var response = await _authService.LoginAsync(model.Gmail, model.Password, UserTypes.Consumer);
+            if (response == null)
                 return Unauthorized(new { message = "Invalid Gmail or Password" });
 
-            return Ok(new { token });
+            return Ok(response);
         }
     }
 }

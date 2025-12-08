@@ -3,6 +3,8 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Payments.MoMo.Models;
 using Payments.MoMo.Services;
+using RentMaster.Core.Models;
+using RentMaster.Data;
 
 namespace Management.RealEstate.Controllers.Payment;
 
@@ -12,13 +14,16 @@ public class PaymentController : ControllerBase
 {
     private readonly IMoMoPaymentService _momoService;
     private readonly ILogger<PaymentController> _logger;
+    private readonly AppDbContext _context;
 
     public PaymentController(
         IMoMoPaymentService momoService,
-        ILogger<PaymentController> logger)
+        ILogger<PaymentController> logger,
+        AppDbContext context)
     {
         _momoService = momoService;
         _logger = logger;
+        _context = context;
     }
 
     [HttpPost("momo/payment")]
@@ -181,19 +186,58 @@ public class PaymentController : ControllerBase
     }
 
     [HttpGet("momo/return")]
-    public IActionResult MoMoReturnUrl([FromQuery] MoMoReturnModel model)
+    public IActionResult MoMoReturnUrl()
     {
-        // Handle return URL after payment
-        // Verify the payment status and show appropriate message to user
-        _logger.LogInformation("Payment return with data: {Model}", model);
-        
-        if (model.ResultCode == 0)
+        var query = HttpContext.Request.Query;
+
+        string partnerCode = query["partnerCode"];
+        string orderId = query["orderId"];
+        string requestId = query["requestId"];
+        long amount = long.TryParse(query["amount"], out var a) ? a : 0;
+        string orderInfo = query["orderInfo"];
+        string orderType = query["orderType"];
+        long transId = long.TryParse(query["transId"], out var t) ? t : 0;
+        int resultCode = int.TryParse(query["resultCode"], out var r) ? r : -1;
+        string message = query["message"];
+        string payType = query["payType"];
+        long responseTime = long.TryParse(query["responseTime"], out var rt) ? rt : 0;
+        string extraData = query["extraData"].ToString() ?? string.Empty;
+        string signature = query["signature"];
+        string redirectUrl = query["redirectUrl"].ToString() ?? "/";
+
+        _logger.LogInformation("Payment return with data: {OrderId}, ResultCode: {ResultCode}", orderId, resultCode);
+
+        if (resultCode == 0)
         {
-            return Redirect($"{model.RedirectUrl}?status=success&orderId={model.OrderId}");
+            try
+            {
+                // Create and save transaction
+                var transaction = new PaymentTransaction
+                {
+                    OrderId = orderId,
+                    PartnerCode = partnerCode,
+                    Amount = amount / 100, // Convert to VND
+                    Message = message,
+                    Status = "Success",
+                    PayType = payType
+                };
+
+                _context.PaymentTransactions.Add(transaction);
+                // await _context.SaveChangesAsync();
+                
+                _logger.LogInformation("Payment transaction logged for order {OrderId}", orderId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error logging payment transaction for order {OrderId}", orderId);
+            }
+
+            return Redirect($"{redirectUrl}?status=success&orderId={orderId}");
         }
-        
-        return Redirect($"{model.RedirectUrl}?status=failed&orderId={model.OrderId}&message={model.Message}");
+
+        return Redirect($"{redirectUrl}?status=failed&orderId={orderId}&message={message}");
     }
+
 }
 
 public class MoMoPaymentRequestModel
@@ -217,7 +261,7 @@ public class MoMoReturnModel
     public string Message { get; set; } = string.Empty;
     public string PayType { get; set; } = string.Empty;
     public long ResponseTime { get; set; }
-    public string ExtraData { get; set; } = string.Empty;
+    public string? ExtraData { get; set; } 
     public string Signature { get; set; } = string.Empty;
     public string RedirectUrl { get; set; } = string.Empty;
 }

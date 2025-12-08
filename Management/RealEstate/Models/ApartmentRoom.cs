@@ -50,7 +50,7 @@ namespace RentMaster.Management.RealEstate.Models
             Status = request.Status;
             Description = request.Description;
 
-            MetaData = request.MetaData; // Parsed dictionary
+            MetaData = request.MetaData; 
 
             if (imageUrls != null && imageUrls.Count > 0)
                 Images = imageUrls;
