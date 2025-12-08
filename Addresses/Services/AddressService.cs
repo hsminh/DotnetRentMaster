@@ -24,4 +24,14 @@ public class AddressService
         );
         return list.ToList();
     }
+
+    public Task<IReadOnlyList<AddressDivision>> GetStreetsAsync() =>
+        _repo.FilterAsync(d => d.Type == DivisionType.Street)
+            .ContinueWith(t => (IReadOnlyList<AddressDivision>)t.Result.OrderBy(x => x.Name).ToList());
+
+    public async Task<AddressDivision> CreateAsync(AddressDivision address)
+    {
+        return await _repo.CreateAsync(address);
+    }
+
 }

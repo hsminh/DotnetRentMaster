@@ -34,6 +34,7 @@
     <ItemGroup>
       <Folder Include="Accounts\Admin\" />
       <Folder Include="Accounts\Auth\" />
+      <Folder Include="Addresses\management\commands\" />
     </ItemGroup>
 
     <ItemGroup>

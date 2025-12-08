@@ -2,6 +2,8 @@ using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Microsoft.AspNetCore.Mvc;
+using RentMaster.Addresses.DTO;
+using RentMaster.Addresses.Models;
 using RentMaster.Addresses.Services;
 namespace RentMaster.Addresses.Controllers;
 
@@ -64,5 +66,31 @@ public class PublicAddressController : ControllerBase
             return StatusCode(500, new { message = "Lỗi server", detail = ex.Message });
         }
     }
+    [HttpGet("street")]
+    public async Task<IActionResult> GetStreets()
+    {
+        var streets = await _service.GetStreetsAsync();
+        return Ok(streets);
+    }
+    [HttpPost("create")]
+    public async Task<IActionResult> CreateAddress([FromBody] CreateAddressDto dto)
+    {
+        if (dto == null)
+            return BadRequest("DTO không được nhận"); // ✅ bây giờ hợp lệ
+        if (string.IsNullOrWhiteSpace(dto.Name))
+            return BadRequest("Tên là bắt buộc"); // ✅ hợp lệ
 
+        var address = new AddressDivision
+        {
+            Name = dto.Name,
+            Type = dto.Type.ToString(),
+            Code = Guid.NewGuid().ToString(),
+            ParentId = dto.ParentId
+        };
+
+        // ✅ await bây giờ hợp lệ vì method async
+        var created = await _service.CreateAsync(address);
+
+        return Ok(created);
+    }
 }
