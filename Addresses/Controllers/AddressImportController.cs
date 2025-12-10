@@ -1,37 +1,37 @@
-using Microsoft.AspNetCore.Mvc;
-using RentMaster.Addresses.Services;
-using RentMaster.Core.Middleware;
+    using Microsoft.AspNetCore.Mvc;
+    using RentMaster.Addresses.Services;
+    using RentMaster.Core.Middleware;
 
-namespace RentMaster.Addresses.Controllers
-{
-    [ApiController]
-    [Attributes.AdminScope]
-    [Route("admin/api/address")]
-    public class AddressImportController : ControllerBase
+    namespace RentMaster.Addresses.Controllers
     {
-        private readonly IAddressImportService _addressImportService;
-        private readonly ILogger<AddressImportController> _logger;
-
-        public AddressImportController(
-            IAddressImportService addressImportService,
-            ILogger<AddressImportController> logger)
+        [ApiController]
+        [Attributes.AdminScope]
+        [Route("admin/api/address")]
+        public class AddressImportController : ControllerBase
         {
-            _addressImportService = addressImportService;
-            _logger = logger;
-        }
+            private readonly IAddressImportService _addressImportService;
+            private readonly ILogger<AddressImportController> _logger;
 
-        [HttpPost("import")]
-        public async Task<IActionResult> Import([FromForm] IFormFile file)    
-        {
-            if (file == null)
-                return BadRequest(new { success = false, message = "File is required" });
+            public AddressImportController(
+                IAddressImportService addressImportService,
+                ILogger<AddressImportController> logger)
+            {
+                _addressImportService = addressImportService;
+                _logger = logger;
+            }
 
-            var result = await _addressImportService.ImportFromCsvAsync(file);
+            [HttpPost("import")]
+            public async Task<IActionResult> Import([FromForm] IFormFile file)    
+            {
+                if (file == null)
+                    return BadRequest(new { success = false, message = "File is required" });
 
-            if (!result.Success)
-                return BadRequest(result);
+                var result = await _addressImportService.ImportFromCsvAsync(file);
 
-            return Ok(result);
+                if (!result.Success)
+                    return BadRequest(result);
+
+                return Ok(result);
+            }
         }
     }
-}
