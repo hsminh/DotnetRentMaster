@@ -93,4 +93,42 @@ public class PublicAddressController : ControllerBase
 
         return Ok(created);
     }
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var address = await _service.GetByUidAsync(id);
+
+        if (address == null)
+            return NotFound(new { message = "Không tìm thấy địa chỉ" });
+
+        return Ok(address); // Trả về JSON entity
+    }
+    // DELETE 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            // Tìm địa chỉ theo id
+            var address = await _service.GetByUidAsync(id);
+            if (address == null)
+            {
+                return NotFound(new { message = "Địa chỉ không tồn tại" });
+            }
+
+            // Xóa
+            await _service.DeleteAsync(address);
+
+            return NoContent(); // 204
+        }
+        
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateAddressDto dto)
+        {
+            var address = await _service.GetByUidAsync(id);
+            if (address == null)
+                return NotFound(new { message = "Không tìm thấy địa chỉ" });
+            address.Name = dto.Name;
+            await _service.UpdateAsync(address);
+            return Ok(address);
+        }
+
 }

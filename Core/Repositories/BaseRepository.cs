@@ -1,3 +1,4 @@
+using RentMaster.Addresses.Models;
 using RentMaster.Core.Repositories.Interface;
 
 namespace RentMaster.Core.Repositories;
@@ -63,6 +64,7 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
 
         public virtual async Task<T> CreateAsync(T entity)
         {
+            
             await _dbSet.AddAsync(entity);
             await _context.SaveChangesAsync();
             return entity;
@@ -79,4 +81,5 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
             _dbSet.Remove(entity);
             await _context.SaveChangesAsync();
         }
+        
     }

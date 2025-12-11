@@ -33,5 +33,18 @@ public class AddressService
     {
         return await _repo.CreateAsync(address);
     }
+    public async Task DeleteAsync(AddressDivision address)
+    {
+        await _repo.DeleteAsync(address);
+    }
+ 
+    public async Task<AddressDivision?> GetByUidAsync(Guid id)
+    {
+        return await _repo.FindByUidAsync(id);
+    }
+    public async Task UpdateAsync(AddressDivision entity)
+    {
+        await _repo.UpdateAsync(entity); // repo update luôn entity đầy đủ
+    }
 
 }
