@@ -1,6 +1,7 @@
 using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
+using Microsoft.EntityFrameworkCore;
 using RentMaster.Addresses.Models;
 using RentMaster.Data;
 
@@ -17,6 +18,7 @@ namespace RentMaster.Addresses.Services
             ILogger<AddressImportService> logger,
             AppDbContext context)
         {
+          
             _logger = logger;
             _context = context;
         }
@@ -59,10 +61,12 @@ namespace RentMaster.Addresses.Services
         public async Task<ImportResult> ImportFromRecordsAsync(List<AddressCsvRecord> records)
         {
             try
-            {
+            {_logger.LogInformation("Clearing old address data...");
+                await _context.Database.ExecuteSqlRawAsync(@"TRUNCATE TABLE ""address_division"" RESTART IDENTITY CASCADE;");
+    
                 _logger.LogInformation("Starting address data import from records...");
 
-                await _context.Database.EnsureCreatedAsync();
+              // await _context.Database.EnsureCreatedAsync();
 
                 // Nếu muốn chặn import khi đã có data:
                 // if (await _context.AddressDivisions.AnyAsync())
@@ -141,27 +145,15 @@ namespace RentMaster.Addresses.Services
                 // Streets (type "5")
                 var streets = records
                     .Where(r => r.Type == "5")
-                    .Select(r =>
+                    .Select(r => new AddressDivision
                     {
-                        string? parentUid = null;
-
-                        // Try to find parent ward by parent code
-                        if (wardDict.TryGetValue(r.ParentCode, out var ward))
-                        {
-                            parentUid = ward.Uid.ToString();
-                        }
-
-                        return new AddressDivision
-                        {
-                            Name = r.Name,
-                            Code = r.Code,
-                            Type = DivisionType.Street,
-                            ParentId = parentUid,
-                            IsDeprecated = false,
-                            PreviousUnitCodes = GetPreviousUnitCodes(r.OldCode)
-                        };
+                        Name = r.Name,
+                        Code = r.Code,
+                        Type = DivisionType.Street,
+                        ParentId = null, // ❗ Không có cha
+                        IsDeprecated = false,
+                        PreviousUnitCodes = GetPreviousUnitCodes(r.OldCode)
                     })
-                    .Where(s => s.ParentId != null) // Only include streets with valid parent wards
                     .ToList();
                 
                 divisions.AddRange(streets);

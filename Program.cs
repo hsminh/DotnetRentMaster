@@ -11,6 +11,7 @@ using FluentValidation.AspNetCore;
 using Npgsql;
 using RentMaster.Addresses;
 using RentMaster.Addresses.Commands;
+using RentMaster.Addresses.Services;
 using RentMaster.Ai;
 using RentMaster.Core.Backend.Auth;
 using RentMaster.Management.RealEstate;
@@ -137,7 +138,8 @@ builder.Services.AddAuthentication()
 // Add Cloudinary
 // ------------------------------
 builder.Services.AddSingleton<CloudinaryStorage>();
-
+builder.Services.AddScoped<AddressService>();
+builder.Services.AddScoped<IAddressImportService, AddressImportService>();
 // ------------------------------
 // Swagger/OpenAPI
 // ------------------------------
