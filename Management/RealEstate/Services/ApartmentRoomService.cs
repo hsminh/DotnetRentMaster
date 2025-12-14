@@ -33,6 +33,11 @@ namespace RentMaster.Management.RealEstate.Services
         {
             return await _apartmentRoomRepository.GetAsync(a => a.LandlordUid == landlord.Uid && a.Uid == uid);
         }
+        
+        public async Task<ApartmentRoom?> GetApartmentRoom(Guid uid)
+        {
+            return await _apartmentRoomRepository.GetAsync(a => a.Uid == uid);
+        }
 
         public async Task<ApartmentRoom> CreateApartmentRoomAsync(LandLord landlord, ApartmentRoomCreateRequest request)
         {
@@ -108,7 +113,7 @@ namespace RentMaster.Management.RealEstate.Services
         return new List<ApartmentRoom>();
 
     var roomQuery = _context.ApartmentRooms
-        .Where(r => !r.IsDelete && apartmentUids.Contains(r.ApartmentUid));
+        .Where(r => !r.IsDelete && apartmentUids.Contains(r.ApartmentUid) && r.Status == ApartmentStatus.Available.ToString());
 
     if (filter != null)
     {

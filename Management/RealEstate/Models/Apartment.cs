@@ -52,7 +52,7 @@ public class Apartment : BaseModel
 
     [Required, Column(TypeName = "varchar(50)")]
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-    public string Status { get; set; } = string.Empty; 
+    public string Status { get; set; } = ApartmentStatus.Available.ToString(); 
     
     public List<string> Images { get; set; } = new();
     
@@ -81,7 +81,7 @@ public class Apartment : BaseModel
         AreaLength = request.AreaLength;
         AreaWidth  = request.AreaWidth;
         Type       = request.Type;
-        Status     = request.Status;
+        Status     = string.IsNullOrEmpty(request.Status) ? ApartmentStatus.Available.ToString() : request.Status;
         Images     = imageUrls;
     }
 

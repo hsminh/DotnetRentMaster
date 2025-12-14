@@ -13,8 +13,8 @@ using RentMaster.Data;
 namespace RentMaster.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251204081039_Update-schema")]
-    partial class Updateschema
+    [Migration("20251212125454_consumer_favorite")]
+    partial class consumer_favorite
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -310,6 +310,49 @@ namespace RentMaster.Migrations
                     b.ToTable("ConsumerContacts");
                 });
 
+            modelBuilder.Entity("RentMaster.Management.ConsumerFavorite.Models.ConsumerFavorite", b =>
+                {
+                    b.Property<Guid>("Uid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ApartmentRoomUid")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ApartmentUid")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("consumer_id")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Uid");
+
+                    b.HasIndex("ApartmentRoomUid");
+
+                    b.HasIndex("ApartmentUid");
+
+                    b.HasIndex("consumer_id");
+
+                    b.ToTable("consumer_favorites");
+                });
+
             modelBuilder.Entity("RentMaster.Management.RealEstate.Models.Apartment", b =>
                 {
                     b.Property<Guid>("Uid")
@@ -539,6 +582,29 @@ namespace RentMaster.Migrations
                     b.Navigation("Consumer");
 
                     b.Navigation("LandLord");
+                });
+
+            modelBuilder.Entity("RentMaster.Management.ConsumerFavorite.Models.ConsumerFavorite", b =>
+                {
+                    b.HasOne("RentMaster.Management.RealEstate.Models.ApartmentRoom", "ApartmentRoom")
+                        .WithMany()
+                        .HasForeignKey("ApartmentRoomUid");
+
+                    b.HasOne("RentMaster.Management.RealEstate.Models.Apartment", "Apartment")
+                        .WithMany()
+                        .HasForeignKey("ApartmentUid");
+
+                    b.HasOne("RentMaster.Accounts.Models.Consumer", "Consumer")
+                        .WithMany()
+                        .HasForeignKey("consumer_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Apartment");
+
+                    b.Navigation("ApartmentRoom");
+
+                    b.Navigation("Consumer");
                 });
 
             modelBuilder.Entity("RentMaster.Management.RealEstate.Models.Apartment", b =>

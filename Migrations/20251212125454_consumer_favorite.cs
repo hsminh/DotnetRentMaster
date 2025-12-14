@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RentMaster.Migrations
 {
     /// <inheritdoc />
-    public partial class Updateschema : Migration
+    public partial class consumer_favorite : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -222,6 +222,41 @@ namespace RentMaster.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "consumer_favorites",
+                columns: table => new
+                {
+                    Uid = table.Column<Guid>(type: "uuid", nullable: false),
+                    Type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    ApartmentUid = table.Column<Guid>(type: "uuid", nullable: true),
+                    ApartmentRoomUid = table.Column<Guid>(type: "uuid", nullable: true),
+                    consumer_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDelete = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_consumer_favorites", x => x.Uid);
+                    table.ForeignKey(
+                        name: "FK_consumer_favorites_apartment_rooms_ApartmentRoomUid",
+                        column: x => x.ApartmentRoomUid,
+                        principalTable: "apartment_rooms",
+                        principalColumn: "Uid");
+                    table.ForeignKey(
+                        name: "FK_consumer_favorites_apartments_ApartmentUid",
+                        column: x => x.ApartmentUid,
+                        principalTable: "apartments",
+                        principalColumn: "Uid");
+                    table.ForeignKey(
+                        name: "FK_consumer_favorites_consumer_consumer_id",
+                        column: x => x.consumer_id,
+                        principalTable: "consumer",
+                        principalColumn: "Uid",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "tenants",
                 columns: table => new
                 {
@@ -279,6 +314,21 @@ namespace RentMaster.Migrations
                 column: "WardDivisionUid");
 
             migrationBuilder.CreateIndex(
+                name: "IX_consumer_favorites_ApartmentRoomUid",
+                table: "consumer_favorites",
+                column: "ApartmentRoomUid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_consumer_favorites_ApartmentUid",
+                table: "consumer_favorites",
+                column: "ApartmentUid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_consumer_favorites_consumer_id",
+                table: "consumer_favorites",
+                column: "consumer_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ConsumerContacts_Consumer_Uid",
                 table: "ConsumerContacts",
                 column: "Consumer_Uid");
@@ -309,6 +359,9 @@ namespace RentMaster.Migrations
         {
             migrationBuilder.DropTable(
                 name: "admin");
+
+            migrationBuilder.DropTable(
+                name: "consumer_favorites");
 
             migrationBuilder.DropTable(
                 name: "ConsumerContacts");

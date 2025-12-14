@@ -31,7 +31,7 @@ namespace RentMaster.Management.RealEstate.Models
 
         [MaxLength(50)]
         [Column(TypeName = "varchar(50)")]
-        public string Status { get; set; } = string.Empty;
+        public string Status { get; set; } = ApartmentStatus.Available.ToString();
 
         public string Description { get; set; } = string.Empty;
 
@@ -47,7 +47,7 @@ namespace RentMaster.Management.RealEstate.Models
             Price = request.Price;
             AreaLength = request.AreaLength;
             AreaWidth = request.AreaWidth;
-            Status = request.Status;
+            Status = ApartmentStatus.Available.ToString();
             Description = request.Description;
 
             MetaData = request.MetaData; 
@@ -62,7 +62,7 @@ namespace RentMaster.Management.RealEstate.Models
             Price = request.Price;
             AreaLength = request.AreaLength;
             AreaWidth = request.AreaWidth;
-            Status = request.Status;
+            Status = string.IsNullOrEmpty(request.Status) ? ApartmentStatus.Available.ToString() : request.Status;
             Description = request.Description;
             MetaData = request.MetaData;
 

@@ -58,6 +58,11 @@ public class ApartmentService : BaseService<Apartment>
     {
         return await _apartmentRepository.GetAsync(a => a.LandlordUid == landlord.Uid && a.Uid == uid);
     }
+    
+    public async Task<Apartment?> GetApartment(Guid uid)
+    {
+        return await _apartmentRepository.GetAsync(a =>a.Uid == uid);
+    }
 
     public async Task<Apartment> CreateApartmentAsync(LandLord landLord, ApartmentCreateRequest request)
     {

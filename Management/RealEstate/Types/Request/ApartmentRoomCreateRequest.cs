@@ -25,10 +25,9 @@ namespace RentMaster.Management.RealEstate.Types.Request
         [Range(0, double.MaxValue)]
         public decimal? AreaWidth { get; set; }
 
-        [MaxLength(50)]
-        public string Status { get; set; } = string.Empty;
-
         public string Description { get; set; } = string.Empty;
+        
+        public string Status { get; set; } = string.Empty;
 
         /// <summary>
         /// Client gửi JSON string, server parse sang Dictionary
