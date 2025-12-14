@@ -87,6 +87,35 @@ public class ConsumerContactController : BaseController<Models.ConsumerContact>
         }
     }
     
+    [HttpGet("type/{type}")]
+    public async Task<IActionResult> GetByType(string type)
+    {
+        try
+        {
+            var landlord = HttpContext.GetCurrentUser<LandLord>();
+            var consumerContacts = await _service.GetConsumerContactsByType(landlord, type);
+            var response = consumerContacts.Select(c => new ConsumerContactResponseDto()
+            {
+                Uid = c.Uid,
+                Status = c.Status.ToString(),
+                Type = c.Type,
+                CreatedAt = c.CreatedAt,
+                Consumer = c.Consumer,
+                RealEstateUnit = c.Apartment != null
+                    ? (object)c.Apartment
+                    : (c.ApartmentRoom != null
+                        ? (object)c.ApartmentRoom
+                        : null)
+            });
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An error occurred while fetching contacts by type" });
+        }
+    }
+
     [HttpPut("{id:guid}/status")]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateStatusRequest request)
     {

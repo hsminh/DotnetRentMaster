@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using RentMaster.Core.Models;
+using RentMaster.Core.Utils;
 using RentMaster.Management.RealEstate.Types.Request;
 
 namespace RentMaster.Management.RealEstate.Models
@@ -15,7 +16,7 @@ namespace RentMaster.Management.RealEstate.Models
         public Guid LandlordUid { get; set; }
 
         [MaxLength(50)]
-        public string RoomNumber { get; set; } = "#1";
+        public string RoomNumber { get; set; } = PidGenerator.GeneratePid(5, "#");
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal? Price { get; set; }
@@ -43,7 +44,7 @@ namespace RentMaster.Management.RealEstate.Models
         {
             LandlordUid = landlordUid;
             ApartmentUid = apartmentUid;
-            RoomNumber = string.IsNullOrWhiteSpace(request.RoomNumber) ? "#1" : request.RoomNumber;
+            RoomNumber = string.IsNullOrWhiteSpace(request.RoomNumber) ? PidGenerator.GeneratePid(5, "#") : request.RoomNumber;
             Price = request.Price;
             AreaLength = request.AreaLength;
             AreaWidth = request.AreaWidth;

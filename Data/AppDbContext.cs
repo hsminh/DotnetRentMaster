@@ -8,6 +8,7 @@ using RentMaster.Management.Tenant.Models;
 using RentMaster.Management.ConsumerContact.Models;
 using RentMaster.Core.Models;
 using RentMaster.Management.ConsumerFavorite.Models;
+using RentMaster.Management.RentalContract.Models;
 
 namespace RentMaster.Data
 {
@@ -28,5 +29,7 @@ namespace RentMaster.Data
         public DbSet<ConsumerContact> ConsumerContacts { get; set; }
         
         public DbSet<ConsumerFavorite> ConsumerFavorites { get; set; }
+
+        public DbSet<RentalContract> RentalContracts { get; set; }
     }
 }

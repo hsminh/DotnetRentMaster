@@ -94,6 +94,7 @@ namespace RentMaster.Addresses.Services
                 // Provinces
                 var provinces = records
                     .Where(r => r.Type == "2")
+                    .DistinctBy(r => r.Code)
                     .Select(r => new AddressDivision
                     {
                         Name = CleanProvinceName(r.Name),
@@ -111,6 +112,7 @@ namespace RentMaster.Addresses.Services
                 // Wards (type "3" or "4")
                 var wards = records
                     .Where(r => r.Type == "3" || r.Type == "4")
+                    .DistinctBy(r => r.Code)
                     .Select(r =>
                     {
                         string? parentUid = null;
@@ -145,12 +147,13 @@ namespace RentMaster.Addresses.Services
                 // Streets (type "5")
                 var streets = records
                     .Where(r => r.Type == "5")
+                    .DistinctBy(r => r.Code)
                     .Select(r => new AddressDivision
                     {
                         Name = r.Name,
                         Code = r.Code,
                         Type = DivisionType.Street,
-                        ParentId = null, // ❗ Không có cha
+                        ParentId = null,
                         IsDeprecated = false,
                         PreviousUnitCodes = GetPreviousUnitCodes(r.OldCode)
                     })

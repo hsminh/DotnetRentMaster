@@ -10,5 +10,8 @@ namespace RentMaster.Management.ConsumerContact.Request
         
         [Required]
         public Guid ApartmentUid { get; set; }
+        
+        [Required]
+        public string Type { get; set; } = string.Empty;
     }
 }

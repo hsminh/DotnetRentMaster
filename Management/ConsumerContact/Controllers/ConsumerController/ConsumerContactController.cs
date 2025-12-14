@@ -50,7 +50,8 @@ namespace RentMaster.Management.ConsumerContact.Controllers
                 var contact = await _consumerContactService.AddConsumerToApartment(
                     user.Uid,
                     request.LandlordUid,
-                    request.ApartmentUid
+                    request.ApartmentUid,
+                    request.Type
                 );
 
                 // Prepare notification data
