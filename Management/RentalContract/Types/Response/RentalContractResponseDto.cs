@@ -10,7 +10,11 @@ public class RentalContractResponseDto
 
     public Guid ApartmentUid { get; set; }
 
-    public Guid? ApartmentRoomUid { get; set; }
+    public string? Type { get; set; }
+
+    public Guid ResponsibleUid { get; set; }
+
+    public string? ParticipantUidsJson { get; set; }
 
     public decimal MonthlyPrice { get; set; }
 

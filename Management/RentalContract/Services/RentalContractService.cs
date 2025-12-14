@@ -1,5 +1,8 @@
+using Microsoft.EntityFrameworkCore;
 using RentMaster.Core.Services;
 using RentMaster.Data;
+using RentMaster.Management.RealEstate.Models;
+using RentMaster.Management.RealEstate.Repositories;
 using RentMaster.Management.RentalContract.Repositories;
 using RentMaster.Management.RentalContract.Types.Request;
 
@@ -8,23 +11,50 @@ namespace RentMaster.Management.RentalContract.Services;
 public class RentalContractService : BaseService<Models.RentalContract>
 {
     private readonly RentalContractRepository _repository;
+    private readonly ApartmentRepository _apartmentRepository;
+    private readonly ApartmentRoomRepository _apartmentRoomRepository;
     private readonly AppDbContext _context;
 
-    public RentalContractService(RentalContractRepository repository, AppDbContext context)
+    public RentalContractService(
+        RentalContractRepository repository,
+        ApartmentRepository apartmentRepository,
+        ApartmentRoomRepository apartmentRoomRepository,
+        AppDbContext context)
         : base(repository)
     {
         _repository = repository;
+        _apartmentRepository = apartmentRepository;
+        _apartmentRoomRepository = apartmentRoomRepository;
         _context = context;
     }
 
     public async Task<Models.RentalContract> CreateContractAsync(RentalContractCreateRequest request)
     {
+        if (request.Type == "RoomBased")
+        {
+            var roomExists = await _context.ApartmentRooms.AnyAsync(r => r.Uid == request.ApartmentUid && !r.IsDelete);
+            if (!roomExists)
+                throw new InvalidOperationException($"Room with ID {request.ApartmentUid} does not exist.");
+        }
+        else if (request.Type == "FullApartment")
+        {
+            var apartmentExists = await _context.Apartments.AnyAsync(a => a.Uid == request.ApartmentUid && !a.IsDelete);
+            if (!apartmentExists)
+                throw new InvalidOperationException($"Apartment with ID {request.ApartmentUid} does not exist.");
+        }
+        else
+        {
+            throw new InvalidOperationException($"Invalid contract type: {request.Type}. Must be 'RoomBased' or 'FullApartment'.");
+        }
+
         var contract = new Models.RentalContract()
         {
             ConsumerUid = request.ConsumerUid,
             LandlordUid = request.LandlordUid,
             ApartmentUid = request.ApartmentUid,
-            ApartmentRoomUid = request.ApartmentRoomUid,
+            Type = request.Type,
+            ResponsibleUid = request.ResponsibleUid,
+            ParticipantUidsJson = request.ParticipantUidsJson,
             MonthlyPrice = request.MonthlyPrice,
             DepositAmount = request.DepositAmount,
             StartDate = request.StartDate,
@@ -60,6 +90,9 @@ public class RentalContractService : BaseService<Models.RentalContract>
         if (contract == null)
             return null;
 
+        contract.Type = request.Type ?? contract.Type;
+        contract.ResponsibleUid = request.ResponsibleUid ?? contract.ResponsibleUid;
+        contract.ParticipantUidsJson = request.ParticipantUidsJson ?? contract.ParticipantUidsJson;
         contract.MonthlyPrice = request.MonthlyPrice ?? contract.MonthlyPrice;
         contract.DepositAmount = request.DepositAmount ?? contract.DepositAmount;
         contract.StartDate = request.StartDate ?? contract.StartDate;

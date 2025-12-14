@@ -13,7 +13,13 @@ public class RentalContractCreateRequest
     [Required]
     public Guid ApartmentUid { get; set; }
 
-    public Guid? ApartmentRoomUid { get; set; }
+    [Required]
+    public string Type { get; set; }
+
+    [Required]
+    public Guid ResponsibleUid { get; set; }
+
+    public string? ParticipantUidsJson { get; set; }
 
     [Required]
     [Range(0.01, double.MaxValue)]
