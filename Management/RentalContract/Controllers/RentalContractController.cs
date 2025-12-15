@@ -93,7 +93,7 @@ public class RentalContractController : ControllerBase
             ApartmentUid = contract.ApartmentUid,
             Type = contract.Type,
             ResponsibleUid = contract.ResponsibleUid,
-            ParticipantUidsJson = contract.ParticipantUidsJson,
+            ParticipantUids = contract.ParticipantUids,
             MonthlyPrice = contract.MonthlyPrice,
             DepositAmount = contract.DepositAmount,
             StartDate = contract.StartDate,

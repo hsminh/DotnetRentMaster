@@ -19,7 +19,7 @@ public class RentalContractCreateRequest
     [Required]
     public Guid ResponsibleUid { get; set; }
 
-    public string? ParticipantUidsJson { get; set; }
+    public List<Guid>? ParticipantUids { get; set; }
 
     [Required]
     [Range(0.01, double.MaxValue)]

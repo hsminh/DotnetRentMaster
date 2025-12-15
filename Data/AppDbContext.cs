@@ -31,5 +31,7 @@ namespace RentMaster.Data
         public DbSet<ConsumerFavorite> ConsumerFavorites { get; set; }
 
         public DbSet<RentalContract> RentalContracts { get; set; }
+
+        public DbSet<RentalContractMonthlyPayment> RentalContractMonthlyPayments { get; set; }
     }
 }

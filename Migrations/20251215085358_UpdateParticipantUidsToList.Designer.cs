@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RentMaster.Data;
@@ -12,9 +13,11 @@ using RentMaster.Data;
 namespace RentMaster.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251215085358_UpdateParticipantUidsToList")]
+    partial class UpdateParticipantUidsToList
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -554,58 +557,6 @@ namespace RentMaster.Migrations
                     b.ToTable("rental_contracts");
                 });
 
-            modelBuilder.Entity("RentMaster.Management.RentalContract.Models.RentalContractMonthlyPayment", b =>
-                {
-                    b.Property<Guid>("Uid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid?>("CollectedByUid")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDelete")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsPaid")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Method")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Month")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("RentalContractUid")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Uid");
-
-                    b.HasIndex("RentalContractUid");
-
-                    b.ToTable("rental_contract_monthly_payments");
-                });
-
             modelBuilder.Entity("RentMaster.Management.Tenant.Models.Tenant", b =>
                 {
                     b.Property<Guid>("Uid")
@@ -733,17 +684,6 @@ namespace RentMaster.Migrations
                     b.Navigation("Street");
 
                     b.Navigation("Ward");
-                });
-
-            modelBuilder.Entity("RentMaster.Management.RentalContract.Models.RentalContractMonthlyPayment", b =>
-                {
-                    b.HasOne("RentMaster.Management.RentalContract.Models.RentalContract", "RentalContract")
-                        .WithMany()
-                        .HasForeignKey("RentalContractUid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("RentalContract");
                 });
 
             modelBuilder.Entity("RentMaster.Management.Tenant.Models.Tenant", b =>

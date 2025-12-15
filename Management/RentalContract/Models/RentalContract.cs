@@ -22,8 +22,7 @@ public class RentalContract : BaseModel
     [Required]
     public Guid ResponsibleUid { get; set; }
     
-    [Column(TypeName = "text")]
-    public string? ParticipantUidsJson { get; set; }
+    public List<Guid>? ParticipantUids { get; set; }
 
     [Required]
     [Column(TypeName = "decimal(18,2)")]

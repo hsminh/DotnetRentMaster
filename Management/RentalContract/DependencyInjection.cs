@@ -20,6 +20,16 @@ public static class DependencyInjection
             )
         );
 
+        services.AddScoped<RentalContractMonthlyPaymentRepository>();
+        services.AddScoped<RentalContractMonthlyPaymentService>((provider) =>
+            new RentalContractMonthlyPaymentService(
+                provider.GetRequiredService<RentalContractMonthlyPaymentRepository>(),
+                provider.GetRequiredService<AppDbContext>()
+            )
+        );
+
+        services.AddScoped<RentalContractMonthlyPaymentMoMoService>();
+
         return services;
     }
 }

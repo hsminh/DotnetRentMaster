@@ -54,7 +54,7 @@ public class RentalContractService : BaseService<Models.RentalContract>
             ApartmentUid = request.ApartmentUid,
             Type = request.Type,
             ResponsibleUid = request.ResponsibleUid,
-            ParticipantUidsJson = request.ParticipantUidsJson,
+            ParticipantUids = request.ParticipantUids,
             MonthlyPrice = request.MonthlyPrice,
             DepositAmount = request.DepositAmount,
             StartDate = request.StartDate,
@@ -92,7 +92,7 @@ public class RentalContractService : BaseService<Models.RentalContract>
 
         contract.Type = request.Type ?? contract.Type;
         contract.ResponsibleUid = request.ResponsibleUid ?? contract.ResponsibleUid;
-        contract.ParticipantUidsJson = request.ParticipantUidsJson ?? contract.ParticipantUidsJson;
+        contract.ParticipantUids = request.ParticipantUids ?? contract.ParticipantUids;
         contract.MonthlyPrice = request.MonthlyPrice ?? contract.MonthlyPrice;
         contract.DepositAmount = request.DepositAmount ?? contract.DepositAmount;
         contract.StartDate = request.StartDate ?? contract.StartDate;
