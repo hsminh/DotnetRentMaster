@@ -35,6 +35,14 @@ public class RentalContractMonthlyPaymentController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+    
+    // [HttpGet]
+    // public async Task<IActionResult> GetAll()
+    // {
+    //     var landlord = HttpContext.GetCurrentUser<LandLord>();
+    //     var contracts = await _service.GetContractsByLandlordAsync(landlord.Uid);
+    //     return Ok(contracts.Select(MapToResponse));
+    // }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetByUid(Guid id)

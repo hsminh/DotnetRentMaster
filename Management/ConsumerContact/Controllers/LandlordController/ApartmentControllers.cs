@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RentMaster.Accounts.LandLords.Models;
+using RentMaster.Core.Backend.Auth.Types.enums;
 using RentMaster.Core.Controllers;
 using RentMaster.Core.Middleware;
 using RentMaster.Management.ConsumerContact.enums;
@@ -57,65 +58,25 @@ public class ConsumerContactController : BaseController<Models.ConsumerContact>
         }
     }
     
-    [HttpGet]
-    [Route("")]
-    public override async Task<IActionResult> GetAll()
+    [HttpGet("filtered")]
+    public async Task<IActionResult> GetForLandlord(
+        [FromQuery] string? type,
+        [FromQuery] string? status
+    )
     {
-        try
-        {
-            var landlord = HttpContext.GetCurrentUser<LandLord>();
-            var consumerContacts = await _service.GetConsumerContacts(landlord);
-            var response = consumerContacts.Select(c => new ConsumerContactResponseDto()
-            {
-                Uid = c.Uid,
-                Status = c.Status.ToString(),
-                Type = c.Type,
-                CreatedAt = c.CreatedAt,
-                Consumer = c.Consumer, 
-                RealEstateUnit = c.Apartment != null
-                    ? (object)c.Apartment 
-                    : (c.ApartmentRoom != null
-                        ? (object)c.ApartmentRoom
-                        : null) 
-            });
-            
-            return Ok(response);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "An error occurred while fetching contacts" });
-        }
+        var landlord = HttpContext.GetCurrentUser<LandLord>();
+
+        var contacts = await _service
+            .GetConsumerContactsFiltered(
+                landlord.Uid,
+                UserTypes.LandLord,
+                type,
+                status
+            );
+
+        return Ok(contacts);
     }
     
-    [HttpGet("type/{type}")]
-    public async Task<IActionResult> GetByType(string type)
-    {
-        try
-        {
-            var landlord = HttpContext.GetCurrentUser<LandLord>();
-            var consumerContacts = await _service.GetConsumerContactsByType(landlord, type);
-            var response = consumerContacts.Select(c => new ConsumerContactResponseDto()
-            {
-                Uid = c.Uid,
-                Status = c.Status.ToString(),
-                Type = c.Type,
-                CreatedAt = c.CreatedAt,
-                Consumer = c.Consumer,
-                RealEstateUnit = c.Apartment != null
-                    ? (object)c.Apartment
-                    : (c.ApartmentRoom != null
-                        ? (object)c.ApartmentRoom
-                        : null)
-            });
-
-            return Ok(response);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "An error occurred while fetching contacts by type" });
-        }
-    }
-
     [HttpPut("{id:guid}/status")]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateStatusRequest request)
     {

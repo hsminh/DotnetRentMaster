@@ -505,9 +505,6 @@ namespace RentMaster.Migrations
                     b.Property<Guid>("ApartmentUid")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ConsumerUid")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -566,6 +563,9 @@ namespace RentMaster.Migrations
                     b.Property<Guid?>("CollectedByUid")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("ConsumerUid")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -578,7 +578,16 @@ namespace RentMaster.Migrations
                     b.Property<bool>("IsPaid")
                         .HasColumnType("boolean");
 
+                    b.Property<Guid>("LandlordUid")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Method")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MoMoRequestId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MoMoTransactionId")
                         .HasColumnType("text");
 
                     b.Property<int>("Month")
@@ -600,6 +609,10 @@ namespace RentMaster.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Uid");
+
+                    b.HasIndex("ConsumerUid");
+
+                    b.HasIndex("LandlordUid");
 
                     b.HasIndex("RentalContractUid");
 
@@ -737,11 +750,27 @@ namespace RentMaster.Migrations
 
             modelBuilder.Entity("RentMaster.Management.RentalContract.Models.RentalContractMonthlyPayment", b =>
                 {
+                    b.HasOne("RentMaster.Accounts.Models.Consumer", "Consumer")
+                        .WithMany()
+                        .HasForeignKey("ConsumerUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RentMaster.Accounts.LandLords.Models.LandLord", "Landlord")
+                        .WithMany()
+                        .HasForeignKey("LandlordUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("RentMaster.Management.RentalContract.Models.RentalContract", "RentalContract")
                         .WithMany()
                         .HasForeignKey("RentalContractUid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Consumer");
+
+                    b.Navigation("Landlord");
 
                     b.Navigation("RentalContract");
                 });

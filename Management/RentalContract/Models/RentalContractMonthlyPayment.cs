@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using RentMaster.Core.Models;
+using RentMaster.Accounts.LandLords.Models;
+
 
 namespace RentMaster.Management.RentalContract.Models;
 
@@ -12,6 +14,18 @@ public class RentalContractMonthlyPayment : BaseModel
 
     [ForeignKey(nameof(RentalContractUid))]
     public RentalContract RentalContract { get; set; } = null!;
+    
+    [Required]
+    public Guid LandlordUid { get; set; }
+    
+    [ForeignKey(nameof(LandlordUid))]
+    public virtual LandLord Landlord { get; set; } = null!;
+    
+    [Required]
+    public Guid ConsumerUid { get; set; }
+    
+    [ForeignKey(nameof(ConsumerUid))]
+    public virtual Accounts.Models.Consumer Consumer { get; set; } = null!;
 
     [Required]
     public int Year { get; set; }
@@ -33,4 +47,8 @@ public class RentalContractMonthlyPayment : BaseModel
     public string? Note { get; set; }
 
     public string? Method { get; set; }
+
+    public string? MoMoTransactionId { get; set; }
+
+    public string? MoMoRequestId { get; set; }
 }

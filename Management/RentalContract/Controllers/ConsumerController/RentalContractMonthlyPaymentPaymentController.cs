@@ -2,10 +2,12 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Payments.MoMo.Models;
 using RentMaster.Management.RentalContract.Services;
+using RentMaster.Core.Middleware;
 
-namespace RentMaster.Management.RentalContract.Controllers;
+namespace RentMaster.Management.RentalContract.Controllers.ConsumerController;
 
 [ApiController]
+[Attributes.UserScope]
 [Route("consumer/api/rental-payments")]
 public class RentalContractMonthlyPaymentPaymentController : ControllerBase
 {
@@ -20,15 +22,16 @@ public class RentalContractMonthlyPaymentPaymentController : ControllerBase
         _logger = logger;
     }
 
-    [HttpPost("momo/create/{paymentUid:guid}")]
-    public async Task<IActionResult> CreateMoMoPaymentRequest(Guid paymentUid)
+    [HttpPost("momo/create/{contractUid:guid}")]
+    public async Task<IActionResult> CreateMoMoPaymentRequest(Guid contractUid)
     {
         try
         {
-            _logger.LogInformation("Creating MoMo payment request for payment {PaymentUid}", paymentUid);
-
+            var consumer = HttpContext.GetCurrentUser<Accounts.Models.Consumer>();
+            _logger.LogInformation("Creating MoMo payment request for contract {ContractUid}", contractUid);
+            
             var (success, payUrl, message, requestId, orderId) = 
-                await _momoService.CreatePaymentRequestAsync(paymentUid);
+                await _momoService.CreatePaymentRequestAsync(contractUid, consumer);
 
             if (!success)
             {
@@ -37,11 +40,11 @@ public class RentalContractMonthlyPaymentPaymentController : ControllerBase
                 {
                     success = false,
                     message = message,
-                    paymentUid = paymentUid
+                    contractUid = contractUid
                 });
             }
 
-            _logger.LogInformation("MoMo payment created successfully for payment {PaymentUid}", paymentUid);
+            _logger.LogInformation("MoMo payment created successfully for contract {ContractUid}", contractUid);
 
             return Ok(new
             {
@@ -52,13 +55,13 @@ public class RentalContractMonthlyPaymentPaymentController : ControllerBase
                     payUrl = payUrl,
                     requestId = requestId,
                     orderId = orderId,
-                    paymentUid = paymentUid
+                    contractUid = contractUid
                 }
             });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating MoMo payment for payment {PaymentUid}", paymentUid);
+            _logger.LogError(ex, "Error creating MoMo payment for contract {ContractUid}", contractUid);
             return StatusCode(500, new
             {
                 success = false,
@@ -68,7 +71,7 @@ public class RentalContractMonthlyPaymentPaymentController : ControllerBase
     }
 
     [HttpPost("momo/ipn")]
-    public async Task<IActionResult> HandleMoMoIPN([FromBody] MoMoIpnModel data)
+    public async Task<IActionResult> MomoIpn([FromBody] MoMoIpnModel data)
     {
         try
         {
@@ -95,41 +98,6 @@ public class RentalContractMonthlyPaymentPaymentController : ControllerBase
         {
             _logger.LogError(ex, "Error processing MoMo IPN");
             return StatusCode(500, new { message = "An error occurred while processing IPN" });
-        }
-    }
-
-    [HttpGet("momo/return")]
-    public async Task<IActionResult> HandleMoMoReturn()
-    {
-        try
-        {
-            var query = HttpContext.Request.Query;
-
-            string orderId = query["orderId"];
-            int resultCode = int.TryParse(query["resultCode"], out var r) ? r : -1;
-            string extraData = query["extraData"].ToString() ?? string.Empty;
-            string redirectUrl = query["redirectUrl"].ToString() ?? "/";
-
-            _logger.LogInformation("MoMo return with data: OrderId: {OrderId}, ResultCode: {ResultCode}", 
-                orderId, resultCode);
-
-            var result = await _momoService.HandleMoMoReturnAsync(orderId, resultCode, extraData);
-
-            if (resultCode == 0)
-            {
-                _logger.LogInformation("Payment successful for order {OrderId}", orderId);
-                return Redirect($"{redirectUrl}?status=success&orderId={orderId}&paymentUid={extraData}");
-            }
-
-            _logger.LogWarning("Payment failed for order {OrderId}, ResultCode: {ResultCode}", 
-                orderId, resultCode);
-            string message = query["message"].ToString() ?? "Payment failed";
-            return Redirect($"{redirectUrl}?status=failed&orderId={orderId}&message={message}");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error handling MoMo return");
-            return StatusCode(500, new { message = "An error occurred while processing payment return" });
         }
     }
 }

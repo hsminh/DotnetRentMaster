@@ -88,7 +88,6 @@ public class RentalContractController : ControllerBase
         => new()
         {
             Uid = contract.Uid,
-            ConsumerUid = contract.ConsumerUid,
             LandlordUid = contract.LandlordUid,
             ApartmentUid = contract.ApartmentUid,
             Type = contract.Type,

@@ -4,8 +4,6 @@ namespace RentMaster.Management.RentalContract.Types.Request;
 
 public class RentalContractCreateRequest
 {
-    [Required]
-    public Guid ConsumerUid { get; set; }
 
     [Required]
     public Guid LandlordUid { get; set; }

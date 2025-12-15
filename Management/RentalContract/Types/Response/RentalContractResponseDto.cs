@@ -27,4 +27,6 @@ public class RentalContractResponseDto
     public string Status { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }
+
+    public object? ApartmentDetails { get; set; }
 }

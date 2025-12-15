@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RentMaster.Core.Services;
 using RentMaster.Data;
-using RentMaster.Management.RealEstate.Models;
 using RentMaster.Management.RealEstate.Repositories;
 using RentMaster.Management.RentalContract.Repositories;
 using RentMaster.Management.RentalContract.Types.Request;
@@ -49,7 +48,6 @@ public class RentalContractService : BaseService<Models.RentalContract>
 
         var contract = new Models.RentalContract()
         {
-            ConsumerUid = request.ConsumerUid,
             LandlordUid = request.LandlordUid,
             ApartmentUid = request.ApartmentUid,
             Type = request.Type,
@@ -57,8 +55,8 @@ public class RentalContractService : BaseService<Models.RentalContract>
             ParticipantUids = request.ParticipantUids,
             MonthlyPrice = request.MonthlyPrice,
             DepositAmount = request.DepositAmount,
-            StartDate = request.StartDate,
-            EndDate = request.EndDate
+            StartDate = DateTime.SpecifyKind(request.StartDate, DateTimeKind.Utc),
+            EndDate = request.EndDate.HasValue ? DateTime.SpecifyKind(request.EndDate.Value, DateTimeKind.Utc) : null
         };
 
         return await _repository.CreateAsync(contract);
@@ -68,15 +66,21 @@ public class RentalContractService : BaseService<Models.RentalContract>
     {
         return await _repository.GetAsync(c => c.Uid == uid);
     }
+    public async Task<IEnumerable<Models.RentalContract>> GetContractsByParticipantAsync(Guid consumerUid)
+    {
+        return await _context.RentalContracts
+            .AsNoTracking()
+            .Where(c =>
+                !c.IsDelete &&
+                c.ParticipantUids != null &&
+                c.ParticipantUids.Any(p => p == consumerUid)
+            )
+            .ToListAsync();
+    }
 
     public async Task<IEnumerable<Models.RentalContract>> GetContractsByLandlordAsync(Guid landlordUid)
     {
         return await _repository.FilterAsync(c => c.LandlordUid == landlordUid && !c.IsDelete);
-    }
-
-    public async Task<IEnumerable<Models.RentalContract>> GetContractsByConsumerAsync(Guid consumerUid)
-    {
-        return await _repository.FilterAsync(c => c.ConsumerUid == consumerUid && !c.IsDelete);
     }
 
     public async Task<IEnumerable<Models.RentalContract>> GetContractsByApartmentAsync(Guid apartmentUid)
@@ -95,8 +99,8 @@ public class RentalContractService : BaseService<Models.RentalContract>
         contract.ParticipantUids = request.ParticipantUids ?? contract.ParticipantUids;
         contract.MonthlyPrice = request.MonthlyPrice ?? contract.MonthlyPrice;
         contract.DepositAmount = request.DepositAmount ?? contract.DepositAmount;
-        contract.StartDate = request.StartDate ?? contract.StartDate;
-        contract.EndDate = request.EndDate ?? contract.EndDate;
+        contract.StartDate = request.StartDate.HasValue ? DateTime.SpecifyKind(request.StartDate.Value, DateTimeKind.Utc) : contract.StartDate;
+        contract.EndDate = request.EndDate.HasValue ? DateTime.SpecifyKind(request.EndDate.Value, DateTimeKind.Utc) : contract.EndDate;
         contract.Status = request.Status ?? contract.Status;
 
         await _repository.UpdateAsync(contract);

@@ -5,6 +5,7 @@ using Payments.MoMo.Models;
 using Payments.MoMo.Services;
 using RentMaster.Core.Models;
 using RentMaster.Data;
+using RentMaster.Management.RentalContract.Services;
 
 namespace Management.RealEstate.Controllers.Payment;
 
@@ -15,15 +16,18 @@ public class PaymentController : ControllerBase
     private readonly IMoMoPaymentService _momoService;
     private readonly ILogger<PaymentController> _logger;
     private readonly AppDbContext _context;
+    private readonly RentalContractMonthlyPaymentService _rentalPaymentService;
 
     public PaymentController(
         IMoMoPaymentService momoService,
         ILogger<PaymentController> logger,
-        AppDbContext context)
+        AppDbContext context,
+        RentalContractMonthlyPaymentService rentalPaymentService)
     {
         _momoService = momoService;
         _logger = logger;
         _context = context;
+        _rentalPaymentService = rentalPaymentService;
     }
 
     [HttpPost("momo/payment")]
@@ -120,7 +124,7 @@ public class PaymentController : ControllerBase
     }
 
     [HttpPost("momo/ipn")]
-    public IActionResult ProcessMoMoIPN([FromBody] MoMoIpnModel data)
+    public async Task<IActionResult> ProcessMoMoIPN([FromBody] MoMoIpnModel data)
     {
         try
         {
@@ -132,51 +136,40 @@ public class PaymentController : ControllerBase
                 return BadRequest(new { message = "Invalid IPN data" });
             }
 
-            // Verify signature
-            // Build raw hash string for verification in the same order as creation
-            var rawHash = new StringBuilder();
-            rawHash.Append($"accessKey={_momoService.GetAccessKey()}&");  // You'll need to add this getter
-            rawHash.Append($"amount={data.Amount}&");
-            rawHash.Append($"extraData={data.ExtraData}&");
-            rawHash.Append($"ipnUrl={_momoService.GetIpnUrl()}&");
-            rawHash.Append($"orderId={data.OrderId}&");
-            rawHash.Append($"orderInfo={Uri.EscapeDataString(data.OrderInfo)}&");
-            rawHash.Append($"partnerCode={data.PartnerCode}&");
-            rawHash.Append($"redirectUrl={_momoService.GetReturnUrl()}&");
-            rawHash.Append($"requestId={data.RequestId}&");
-            rawHash.Append($"requestType=captureWallet&");
-            rawHash.Append($"responseTime={data.ResponseTime}&");
-            rawHash.Append($"resultCode={data.ResultCode}&");
-            rawHash.Append($"transId={data.TransId}");
-
-            var rawHashString = rawHash.ToString();
-            _logger.LogDebug("IPN Verification hash: {Hash}", rawHashString);
-
-            // Verify signature
-            if (!_momoService.VerifySignature(rawHashString, data.Signature))
-            {
-                _logger.LogError("IPN signature verification failed for orderId: {OrderId}", data.OrderId);
-                return Unauthorized(new { message = "Invalid signature" });
-            }
-
-            // Signature is valid, process the payment result
-            _logger.LogInformation("IPN signature verified successfully for orderId: {OrderId}, ResultCode: {ResultCode}",
+            _logger.LogInformation("Processing IPN for orderId: {OrderId}, ResultCode: {ResultCode}",
                 data.OrderId, data.ResultCode);
 
             if (data.ResultCode == 0)
             {
-                _logger.LogInformation("Payment successful - OrderId: {OrderId}, TransId: {TransId}, Amount: {Amount}",
-                    data.OrderId, data.TransId, data.Amount);
-                // TODO: Update your database with successful payment
+                if (Guid.TryParse(data.ExtraData, out var paymentUid))
+                {
+                    _logger.LogInformation("Payment successful - PaymentUid: {PaymentUid}, OrderId: {OrderId}, Amount: {Amount}, TransId: {TransId}",
+                        paymentUid, data.OrderId, data.Amount, data.TransId);
+
+                    var payment = await _rentalPaymentService.MarkAsPaidAsync(paymentUid, null, "MoMo", data.TransId.ToString(), data.RequestId);
+                    if (payment != null)
+                    {
+                        _logger.LogInformation("Monthly payment marked as paid. PaymentUid: {PaymentUid}, TransId: {TransId}", paymentUid, data.TransId);
+                        return Ok(new { message = "IPN processed successfully" });
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Failed to mark payment as paid. PaymentUid: {PaymentUid}", paymentUid);
+                        return BadRequest(new { message = "Failed to mark payment as paid" });
+                    }
+                }
+                else
+                {
+                    _logger.LogError("Invalid ExtraData format: {ExtraData}", data.ExtraData);
+                    return BadRequest(new { message = "Invalid ExtraData format" });
+                }
             }
             else
             {
                 _logger.LogWarning("Payment failed - OrderId: {OrderId}, ResultCode: {ResultCode}, Message: {Message}",
                     data.OrderId, data.ResultCode, data.Message);
-                // TODO: Update your database with failed payment
+                return Ok(new { message = "Payment failed but IPN processed" });
             }
-
-            return Ok(new { message = "IPN processed successfully" });
         }
         catch (Exception ex)
         {
@@ -185,58 +178,6 @@ public class PaymentController : ControllerBase
         }
     }
 
-    [HttpGet("momo/return")]
-    public IActionResult MoMoReturnUrl()
-    {
-        var query = HttpContext.Request.Query;
-
-        string partnerCode = query["partnerCode"];
-        string orderId = query["orderId"];
-        string requestId = query["requestId"];
-        long amount = long.TryParse(query["amount"], out var a) ? a : 0;
-        string orderInfo = query["orderInfo"];
-        string orderType = query["orderType"];
-        long transId = long.TryParse(query["transId"], out var t) ? t : 0;
-        int resultCode = int.TryParse(query["resultCode"], out var r) ? r : -1;
-        string message = query["message"];
-        string payType = query["payType"];
-        long responseTime = long.TryParse(query["responseTime"], out var rt) ? rt : 0;
-        string extraData = query["extraData"].ToString() ?? string.Empty;
-        string signature = query["signature"];
-        string redirectUrl = query["redirectUrl"].ToString() ?? "/";
-
-        _logger.LogInformation("Payment return with data: {OrderId}, ResultCode: {ResultCode}", orderId, resultCode);
-
-        if (resultCode == 0)
-        {
-            try
-            {
-                // Create and save transaction
-                var transaction = new PaymentTransaction
-                {
-                    OrderId = orderId,
-                    PartnerCode = partnerCode,
-                    Amount = amount / 100, // Convert to VND
-                    Message = message,
-                    Status = "Success",
-                    PayType = payType
-                };
-
-                _context.PaymentTransactions.Add(transaction);
-                // await _context.SaveChangesAsync();
-                
-                _logger.LogInformation("Payment transaction logged for order {OrderId}", orderId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error logging payment transaction for order {OrderId}", orderId);
-            }
-
-            return Redirect($"{redirectUrl}?status=success&orderId={orderId}");
-        }
-
-        return Redirect($"{redirectUrl}?status=failed&orderId={orderId}&message={message}");
-    }
 
 }
 

@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using RentMaster.Accounts.LandLords.Models;
+using RentMaster.Core.Backend.Auth.Types.enums;
 using RentMaster.Core.Controllers;
 using RentMaster.Core.Exceptions;
 using RentMaster.Core.Middleware;
@@ -30,7 +32,38 @@ namespace RentMaster.Management.ConsumerContact.Controllers
             _logger = logger;
             _configuration = configuration;
         }
+    
+        [HttpGet("my-rentals")]
+        public async Task<IActionResult> GetMyRentals(
+            [FromQuery] string? type,
+            [FromQuery] string? status
+        )
+        {
+            var consumer = HttpContext.GetCurrentUser<Accounts.Models.Consumer>();
+            var contacts = await _consumerContactService
+                .GetConsumerContactsFiltered(
+                    consumer.Uid,
+                    UserTypes.Consumer,
+                    type,
+                    status
+                );
 
+            var response = contacts.Select(c => new ConsumerContactResponseDto
+            {
+                Uid = c.Uid,
+                Status = c.Status.ToString(),
+                Type = c.Type,
+                CreatedAt = c.CreatedAt,
+                Consumer = c.Consumer,
+                RealEstateUnit = c.Type.Equals("FullApartment", StringComparison.OrdinalIgnoreCase) 
+                    ? (object)c.Apartment 
+                    : c.ApartmentRoom
+            }).ToList();
+
+            return Ok(response);
+        }
+
+        
         [HttpPost("join")]
         public async Task<IActionResult> JoinApartment([FromBody] JoinApartmentRequest request)
         {

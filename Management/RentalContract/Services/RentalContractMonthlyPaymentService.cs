@@ -51,7 +51,7 @@ public class RentalContractMonthlyPaymentService : BaseService<Models.RentalCont
 
         return await _repository.CreateAsync(payment);
     }
-
+    
     public async Task<Models.RentalContractMonthlyPayment?> GetPaymentAsync(Guid uid)
     {
         return await _repository.GetAsync(p => p.Uid == uid);
@@ -64,6 +64,7 @@ public class RentalContractMonthlyPaymentService : BaseService<Models.RentalCont
             p.RentalContractUid == contractUid && !p.IsDelete);
     }
 
+
     public async Task<IEnumerable<Models.RentalContractMonthlyPayment>> GetUnpaidPaymentsAsync(
         Guid contractUid)
     {
@@ -74,7 +75,9 @@ public class RentalContractMonthlyPaymentService : BaseService<Models.RentalCont
     public async Task<Models.RentalContractMonthlyPayment?> MarkAsPaidAsync(
         Guid uid,
         Guid? collectedByUid = null,
-        string? method = null)
+        string? method = null,
+        string? momoTransactionId = null,
+        string? momoRequestId = null)
     {
         var payment = await _repository.GetAsync(p => p.Uid == uid);
         if (payment == null)
@@ -84,6 +87,10 @@ public class RentalContractMonthlyPaymentService : BaseService<Models.RentalCont
         payment.PaidAt = DateTime.UtcNow;
         payment.CollectedByUid = collectedByUid;
         payment.Method = method;
+        if (!string.IsNullOrEmpty(momoTransactionId))
+            payment.MoMoTransactionId = momoTransactionId;
+        if (!string.IsNullOrEmpty(momoRequestId))
+            payment.MoMoRequestId = momoRequestId;
 
         await _repository.UpdateAsync(payment);
         return payment;

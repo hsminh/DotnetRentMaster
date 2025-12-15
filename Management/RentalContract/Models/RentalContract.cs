@@ -8,8 +8,6 @@ namespace RentMaster.Management.RentalContract.Models;
 [Table("rental_contracts")]
 public class RentalContract : BaseModel
 {
-    [Required]
-    public Guid ConsumerUid { get; set; }
 
     [Required]
     public Guid LandlordUid { get; set; }

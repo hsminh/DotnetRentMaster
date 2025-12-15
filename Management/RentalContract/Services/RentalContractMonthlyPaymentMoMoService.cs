@@ -27,30 +27,69 @@ public class RentalContractMonthlyPaymentMoMoService
     }
 
     public async Task<(bool Success, string? PayUrl, string? Message, string? RequestId, string? OrderId)> 
-        CreatePaymentRequestAsync(Guid monthlyPaymentUid)
+        CreatePaymentRequestAsync(Guid rentalContractUid, Accounts.Models.Consumer consumer)
     {
         try
         {
+            var contract = await _context.RentalContracts
+                .FirstOrDefaultAsync(c => c.Uid == rentalContractUid && !c.IsDelete);
+
+            if (contract == null)
+                return (false, null, "Rental contract not found", null, null);
+
+            if (consumer == null)
+                return (false, null, "Consumer not found", null, null);
+
+            var currentYear = DateTime.UtcNow.Year;
+            var currentMonth = DateTime.UtcNow.Month;
+
             var payment = await _context.RentalContractMonthlyPayments
                 .Include(p => p.RentalContract)
-                .FirstOrDefaultAsync(p => p.Uid == monthlyPaymentUid && !p.IsDelete);
+                .FirstOrDefaultAsync(p => 
+                    p.RentalContractUid == rentalContractUid && 
+                    p.Year == currentYear && 
+                    p.Month == currentMonth && 
+                    !p.IsDelete);
 
             if (payment == null)
-                return (false, null, "Payment not found", null, null);
-
-            if (payment.IsPaid)
-                return (false, null, "Payment is already paid", null, null);
-
-            var orderId = $"MONTHLY-{payment.RentalContractUid:N}-{payment.Year}-{payment.Month}";
+            {
+                _logger.LogInformation("Payment for month {Month}/{Year} not found. Auto-creating with amount {Amount}",
+                    currentMonth, currentYear, contract.MonthlyPrice);
+                
+                payment = new RentalContractMonthlyPayment
+                {
+                    RentalContractUid = rentalContractUid,
+                    LandlordUid = contract.LandlordUid,
+                    ConsumerUid = consumer.Uid,
+                    Year = currentYear,
+                    Month = currentMonth,
+                    Amount = contract.MonthlyPrice,
+                    IsPaid = false
+                };
+                
+                _context.RentalContractMonthlyPayments.Add(payment);
+                await _context.SaveChangesAsync();
+                
+                _logger.LogInformation("Monthly payment created. PaymentUid: {PaymentUid}, Amount: {Amount}",
+                    payment.Uid, payment.Amount);
+            }
+            else if (payment.IsPaid)
+            {
+                _logger.LogWarning("Payment for month {Month}/{Year} already paid. PaymentUid: {PaymentUid}, PaidAt: {PaidAt}",
+                    currentMonth, currentYear, payment.Uid, payment.PaidAt);
+                return (false, null, $"Tháng {currentMonth}/{currentYear} đã thanh toán rồi", null, null);
+            }
+            var orderId =
+                $"MONTHLY-{payment.RentalContractUid:N}-{payment.Year}-{payment.Month}-{DateTime.UtcNow:yyyyMMddHHmmss}";
             var orderInfo = $"Thanh toán hóa đơn tháng {payment.Month}/{payment.Year} - Hợp đồng {payment.RentalContractUid:N}";
 
             var request = new MoMoPaymentRequest
             {
                 RequestId = _momoService.GenerateRequestId(),
-                Amount = (long)(payment.Amount * 100),
+                Amount = (long)(payment.Amount),
                 OrderId = orderId,
                 OrderInfo = orderInfo,
-                ExtraData = monthlyPaymentUid.ToString("N"),
+                ExtraData = payment.Uid.ToString("N"),
                 RequestType = "captureWallet",
                 IpnUrl = _momoService.GetIpnUrl(),
                 RedirectUrl = _momoService.GetReturnUrl(),
@@ -64,12 +103,15 @@ public class RentalContractMonthlyPaymentMoMoService
             }
 
             _logger.LogInformation("Creating MoMo payment for monthly payment {PaymentUid}, OrderId: {OrderId}",
-                monthlyPaymentUid, orderId);
+                payment.Uid, orderId);
 
             var response = await _momoService.CreatePaymentAsync(request);
 
             if (response.ResultCode == 0)
             {
+                payment.MoMoRequestId = request.RequestId;
+                await _context.SaveChangesAsync();
+                
                 _logger.LogInformation("MoMo payment created successfully. PayUrl: {PayUrl}", response.PayUrl);
                 return (true, response.PayUrl, "Success", request.RequestId, orderId);
             }
@@ -80,8 +122,7 @@ public class RentalContractMonthlyPaymentMoMoService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating MoMo payment for monthly payment {PaymentUid}",
-                monthlyPaymentUid);
+            _logger.LogError(ex, "Error creating MoMo payment for monthly payment");
             return (false, null, "An error occurred while processing payment", null, null);
         }
     }
@@ -128,13 +169,13 @@ public class RentalContractMonthlyPaymentMoMoService
             {
                 if (Guid.TryParse(data.ExtraData, out var paymentUid))
                 {
-                    _logger.LogInformation("Payment successful - PaymentUid: {PaymentUid}, OrderId: {OrderId}, Amount: {Amount}",
-                        paymentUid, data.OrderId, data.Amount);
+                    _logger.LogInformation("Payment successful - PaymentUid: {PaymentUid}, OrderId: {OrderId}, Amount: {Amount}, TransId: {TransId}",
+                        paymentUid, data.OrderId, data.Amount, data.TransId);
 
-                    var payment = await _paymentService.MarkAsPaidAsync(paymentUid, null, "MoMo");
+                    var payment = await _paymentService.MarkAsPaidAsync(paymentUid, null, "MoMo", data.TransId.ToString(), data.RequestId);
                     if (payment != null)
                     {
-                        _logger.LogInformation("Monthly payment marked as paid. PaymentUid: {PaymentUid}", paymentUid);
+                        _logger.LogInformation("Monthly payment marked as paid. PaymentUid: {PaymentUid}, TransId: {TransId}", paymentUid, data.TransId);
                         return true;
                     }
                     else

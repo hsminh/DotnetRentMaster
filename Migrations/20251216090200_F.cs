@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RentMaster.Migrations
 {
     /// <inheritdoc />
-    public partial class consumer_favorite : Migration
+    public partial class F : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -147,6 +147,31 @@ namespace RentMaster.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "rental_contracts",
+                columns: table => new
+                {
+                    Uid = table.Column<Guid>(type: "uuid", nullable: false),
+                    LandlordUid = table.Column<Guid>(type: "uuid", nullable: false),
+                    ApartmentUid = table.Column<Guid>(type: "uuid", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false),
+                    ResponsibleUid = table.Column<Guid>(type: "uuid", nullable: false),
+                    ParticipantUids = table.Column<List<Guid>>(type: "uuid[]", nullable: true),
+                    MonthlyPrice = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    DepositAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Status = table.Column<string>(type: "varchar(20)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDelete = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_rental_contracts", x => x.Uid);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "apartments",
                 columns: table => new
                 {
@@ -217,6 +242,52 @@ namespace RentMaster.Migrations
                         name: "FK_ConsumerContacts_landlord_Landlord_Uid",
                         column: x => x.Landlord_Uid,
                         principalTable: "landlord",
+                        principalColumn: "Uid",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "rental_contract_monthly_payments",
+                columns: table => new
+                {
+                    Uid = table.Column<Guid>(type: "uuid", nullable: false),
+                    RentalContractUid = table.Column<Guid>(type: "uuid", nullable: false),
+                    LandlordUid = table.Column<Guid>(type: "uuid", nullable: false),
+                    ConsumerUid = table.Column<Guid>(type: "uuid", nullable: false),
+                    Year = table.Column<int>(type: "integer", nullable: false),
+                    Month = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    IsPaid = table.Column<bool>(type: "boolean", nullable: false),
+                    PaidAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CollectedByUid = table.Column<Guid>(type: "uuid", nullable: true),
+                    Note = table.Column<string>(type: "text", nullable: true),
+                    Method = table.Column<string>(type: "text", nullable: true),
+                    MoMoTransactionId = table.Column<string>(type: "text", nullable: true),
+                    MoMoRequestId = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDelete = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_rental_contract_monthly_payments", x => x.Uid);
+                    table.ForeignKey(
+                        name: "FK_rental_contract_monthly_payments_consumer_ConsumerUid",
+                        column: x => x.ConsumerUid,
+                        principalTable: "consumer",
+                        principalColumn: "Uid",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_rental_contract_monthly_payments_landlord_LandlordUid",
+                        column: x => x.LandlordUid,
+                        principalTable: "landlord",
+                        principalColumn: "Uid",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_rental_contract_monthly_payments_rental_contracts_RentalCon~",
+                        column: x => x.RentalContractUid,
+                        principalTable: "rental_contracts",
                         principalColumn: "Uid",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -339,6 +410,21 @@ namespace RentMaster.Migrations
                 column: "Landlord_Uid");
 
             migrationBuilder.CreateIndex(
+                name: "IX_rental_contract_monthly_payments_ConsumerUid",
+                table: "rental_contract_monthly_payments",
+                column: "ConsumerUid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_rental_contract_monthly_payments_LandlordUid",
+                table: "rental_contract_monthly_payments",
+                column: "LandlordUid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_rental_contract_monthly_payments_RentalContractUid",
+                table: "rental_contract_monthly_payments",
+                column: "RentalContractUid");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_tenants_ApartmentRoomUid",
                 table: "tenants",
                 column: "ApartmentRoomUid");
@@ -370,10 +456,16 @@ namespace RentMaster.Migrations
                 name: "PaymentTransactions");
 
             migrationBuilder.DropTable(
+                name: "rental_contract_monthly_payments");
+
+            migrationBuilder.DropTable(
                 name: "tenants");
 
             migrationBuilder.DropTable(
                 name: "landlord");
+
+            migrationBuilder.DropTable(
+                name: "rental_contracts");
 
             migrationBuilder.DropTable(
                 name: "apartment_rooms");
