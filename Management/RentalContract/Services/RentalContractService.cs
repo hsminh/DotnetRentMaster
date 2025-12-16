@@ -4,6 +4,7 @@ using RentMaster.Data;
 using RentMaster.Management.RealEstate.Repositories;
 using RentMaster.Management.RentalContract.Repositories;
 using RentMaster.Management.RentalContract.Types.Request;
+using RentMaster.Management.RentalContract.Types.Response;
 
 namespace RentMaster.Management.RentalContract.Services;
 
@@ -66,9 +67,12 @@ public class RentalContractService : BaseService<Models.RentalContract>
     {
         return await _repository.GetAsync(c => c.Uid == uid);
     }
-    public async Task<IEnumerable<Models.RentalContract>> GetContractsByParticipantAsync(Guid consumerUid)
+    public async Task<IEnumerable<RentalContractResponseDto>> GetContractsByParticipantAsync(Guid consumerUid)
     {
-        return await _context.RentalContracts
+        var currentYear = DateTime.UtcNow.Year;
+        var currentMonth = DateTime.UtcNow.Month;
+
+        var contracts = await _context.RentalContracts
             .AsNoTracking()
             .Where(c =>
                 !c.IsDelete &&
@@ -76,6 +80,45 @@ public class RentalContractService : BaseService<Models.RentalContract>
                 c.ParticipantUids.Any(p => p == consumerUid)
             )
             .ToListAsync();
+
+        var contractUids = contracts.Select(c => c.Uid).ToList();
+
+        var monthlyPayments = await _context.RentalContractMonthlyPayments
+            .AsNoTracking()
+            .Where(p =>
+                contractUids.Contains(p.RentalContractUid) &&
+                p.Year == currentYear &&
+                p.Month == currentMonth &&
+                !p.IsDelete
+            )
+            .ToListAsync();
+
+        var result = contracts.Select(c =>
+        {
+            var payment = monthlyPayments.FirstOrDefault(p => p.RentalContractUid == c.Uid);
+            var isPayment = payment == null || payment.IsPaid;
+
+            return new RentalContractResponseDto
+            {
+                Uid = c.Uid,
+                ConsumerUid = consumerUid,
+                LandlordUid = c.LandlordUid,
+                ApartmentUid = c.ApartmentUid,
+                Type = c.Type,
+                ResponsibleUid = c.ResponsibleUid,
+                ParticipantUids = c.ParticipantUids,
+                MonthlyPrice = c.MonthlyPrice,
+                DepositAmount = c.DepositAmount,
+                StartDate = c.StartDate,
+                EndDate = c.EndDate,
+                Status = c.Status.ToString(),
+                CreatedAt = c.CreatedAt,
+                ApartmentDetails = null,
+                IsPayment = isPayment
+            };
+        }).ToList();
+
+        return result;
     }
 
     public async Task<IEnumerable<Models.RentalContract>> GetContractsByLandlordAsync(Guid landlordUid)

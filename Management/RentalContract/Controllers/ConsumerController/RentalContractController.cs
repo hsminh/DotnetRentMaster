@@ -26,11 +26,15 @@ public class ConsumerRentalContractController : ControllerBase
     {
         var consumer = HttpContext.GetCurrentUser<Accounts.Models.Consumer>();
         var contracts = await _service.GetContractsByParticipantAsync(consumer.Uid);
-        var response = await Task.WhenAll(contracts.Select(c => MapToResponseAsync(c)));
+        var response = new List<RentalContractResponseDto>();
+        foreach (var contract in contracts)
+        {
+            response.Add(await MapToResponseAsync(contract));
+        }
         return Ok(response);
     }
 
-    private async Task<RentalContractResponseDto> MapToResponseAsync(Models.RentalContract contract)
+    private async Task<RentalContractResponseDto> MapToResponseAsync(RentalContractResponseDto contract)
     {
         object? apartmentDetails = null;
 
@@ -47,22 +51,8 @@ public class ConsumerRentalContractController : ControllerBase
                 .FirstOrDefaultAsync(r => r.Uid == contract.ApartmentUid);
         }
 
-        return new()
-        {
-            Uid = contract.Uid,
-            LandlordUid = contract.LandlordUid,
-            ApartmentUid = contract.ApartmentUid,
-            Type = contract.Type,
-            ResponsibleUid = contract.ResponsibleUid,
-            ParticipantUids = contract.ParticipantUids,
-            MonthlyPrice = contract.MonthlyPrice,
-            DepositAmount = contract.DepositAmount,
-            StartDate = contract.StartDate,
-            EndDate = contract.EndDate,
-            Status = contract.Status.ToString(),
-            CreatedAt = contract.CreatedAt,
-            ApartmentDetails = apartmentDetails
-        };
+        contract.ApartmentDetails = apartmentDetails;
+        return contract;
     }
 }
 

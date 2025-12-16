@@ -29,4 +29,6 @@ public class RentalContractResponseDto
     public DateTime CreatedAt { get; set; }
 
     public object? ApartmentDetails { get; set; }
+
+    public bool IsPayment { get; set; }
 }

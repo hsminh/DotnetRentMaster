@@ -134,4 +134,29 @@ public class RentalContractMonthlyPaymentService : BaseService<Models.RentalCont
         await _repository.DeleteAsync(payment);
         return true;
     }
+
+    public async Task<Models.RentalContractMonthlyPayment?> GetPaymentByOrderIdAsync(string orderId)
+    {
+        if (string.IsNullOrEmpty(orderId))
+            return null;
+
+        var parts = orderId.Split('-');
+        if (parts.Length < 4 || parts[0] != "MONTHLY")
+            return null;
+
+        if (!Guid.TryParse(parts[1], out var contractUid))
+            return null;
+
+        if (!int.TryParse(parts[2], out var year))
+            return null;
+
+        if (!int.TryParse(parts[3], out var month))
+            return null;
+
+        return await _repository.GetAsync(p =>
+            p.RentalContractUid == contractUid &&
+            p.Year == year &&
+            p.Month == month &&
+            !p.IsDelete);
+    }
 }

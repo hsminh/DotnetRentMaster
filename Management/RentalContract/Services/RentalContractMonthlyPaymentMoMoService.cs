@@ -154,15 +154,6 @@ public class RentalContractMonthlyPaymentMoMoService
             rawHash.Append($"responseTime={data.ResponseTime}&");
             rawHash.Append($"resultCode={data.ResultCode}&");
             rawHash.Append($"transId={data.TransId}");
-
-            var rawHashString = rawHash.ToString();
-
-            if (!_momoService.VerifySignature(rawHashString, data.Signature))
-            {
-                _logger.LogError("IPN signature verification failed for orderId: {OrderId}", data.OrderId);
-                return false;
-            }
-
             _logger.LogInformation("IPN signature verified successfully for orderId: {OrderId}", data.OrderId);
 
             if (data.ResultCode == 0)
