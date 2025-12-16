@@ -72,6 +72,13 @@ public class RentalContractMonthlyPaymentService : BaseService<Models.RentalCont
             p.RentalContractUid == contractUid && !p.IsPaid && !p.IsDelete);
     }
 
+    public async Task<IEnumerable<Models.RentalContractMonthlyPayment>> GetPaymentsByConsumerAsync(
+        Guid consumerUid)
+    {
+        return await _repository.FilterAsync(p =>
+            p.ConsumerUid == consumerUid && !p.IsDelete);
+    }
+
     public async Task<Models.RentalContractMonthlyPayment?> MarkAsPaidAsync(
         Guid uid,
         Guid? collectedByUid = null,

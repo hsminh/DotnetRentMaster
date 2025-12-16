@@ -96,7 +96,7 @@ public class RentalContractService : BaseService<Models.RentalContract>
         var result = contracts.Select(c =>
         {
             var payment = monthlyPayments.FirstOrDefault(p => p.RentalContractUid == c.Uid);
-            var isPayment = payment == null || payment.IsPaid;
+            var isPayment = payment != null && payment.IsPaid;
 
             return new RentalContractResponseDto
             {

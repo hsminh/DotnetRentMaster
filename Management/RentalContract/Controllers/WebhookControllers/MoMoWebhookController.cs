@@ -21,11 +21,11 @@ public class MoMoWebhookController : ControllerBase
     }
 
     [HttpPost("ipn")]
-    public async Task<IActionResult> MomoIpn([FromBody] MoMoIpnModel data)
+    public async Task<IActionResult> MomoIpn([FromBody] MoMoIpnModel? data)
     {
         try
         {
-            _logger.LogInformation("Received MoMo IPN: {Data}", JsonSerializer.Serialize(data));
+            _logger.LogInformation("IPN endpoint called - raw data received");
 
             if (data == null)
             {
